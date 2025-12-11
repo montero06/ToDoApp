@@ -1,8 +1,13 @@
 package com.example.tarealarga1trimestre;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
 import java.util.Date;
 
-public class Tarea {
+public class Tarea implements Parcelable {
     private String titulo ;
     private String descripcion;
     private int progreso ;
@@ -26,6 +31,26 @@ public class Tarea {
         this.fechaObjetivo = fechaObjetivo;
         this.prirotaria = false;
     }
+
+    protected Tarea(Parcel in) {
+        titulo = in.readString();
+        descripcion = in.readString();
+        progreso = in.readInt();
+        byte tmpPrirotaria = in.readByte();
+        prirotaria = tmpPrirotaria == 0 ? null : tmpPrirotaria == 1;
+    }
+
+    public static final Creator<Tarea> CREATOR = new Creator<Tarea>() {
+        @Override
+        public Tarea createFromParcel(Parcel in) {
+            return new Tarea(in);
+        }
+
+        @Override
+        public Tarea[] newArray(int size) {
+            return new Tarea[size];
+        }
+    };
 
     public String getTitulo() {
         return titulo;
@@ -73,5 +98,18 @@ public class Tarea {
 
     public void setPrirotaria(Boolean prirotaria) {
         this.prirotaria = prirotaria;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeString(titulo);
+        dest.writeString(descripcion);
+        dest.writeInt(progreso);
+        dest.writeByte((byte) (prirotaria == null ? 0 : prirotaria ? 1 : 2));
     }
 }

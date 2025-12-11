@@ -1,5 +1,6 @@
 package com.example.tarealarga1trimestre;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,7 +25,30 @@ public class CrearTareaAtivity extends AppCompatActivity {
                 .replace(R.id.fragmentContainerCrear, new Fragmento1())
                 .commit();
     }
-    
+
+
+    public void volverPaso1() {
+        getSupportFragmentManager().popBackStack();
+    }
+
+
+    public void cargarPaso2() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainerCrear, new Fragmento2())
+                .addToBackStack(null)
+                .commit();
+    }
+
+
+    public void guardarTareaYSalir(Tarea nueva) {
+        Intent data = new Intent();
+        data.putExtra("TAREA_NUEVA", nueva);
+        setResult(RESULT_OK, data);
+
+        finish(); // ¡ESTO ES SUFICIENTE!
+
+    }
+
 
 
 

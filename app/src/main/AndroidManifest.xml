@@ -12,8 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TareaLarga1trimestre">
 
-        <activity android:name=".ListadoTareasActivity" />
 
+        <activity android:name=".ListadoTareasActivity" />
+        <activity android:name=".EditarTareaActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
