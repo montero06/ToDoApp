@@ -1,10 +1,11 @@
 package com.example.tarealarga1trimestre;
 
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import java.util.Date;
 
-public class FormularioViewModel {
+public class FormularioViewModel extends ViewModel {
 
     // esto de LiveData  es una movida de que hace que cuando un dato esta en secundaria se actualice
     // automaticamente sin necesidad de pasar el dato (Creo que solo sirve para fragmentos!!!!)

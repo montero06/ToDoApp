@@ -21,9 +21,11 @@ public class CrearTareaAtivity extends AppCompatActivity {
 
         // Cargar primer fragmento
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.contenedorFragmentos, new FragmentoPasoUno())
+                .replace(R.id.fragmentContainerCrear, new Fragmento1())
                 .commit();
     }
+    
+
 
 
 }
