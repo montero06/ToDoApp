@@ -2,6 +2,7 @@ package com.example.tarealarga1trimestre;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,8 +10,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -76,6 +80,30 @@ public class ListadoTareasActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CrearTareaAtivity.class);
             crearTareaLauncher.launch(intent);
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        menu.setGroupVisible(R.id.it_groupIconos,true);
+        menu.setGroupVisible(R.id.it_groupMasOpciones,true);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id=item.getItemId();
+        if (id == R.id.it_addTarea) {
+            Toast.makeText(this, "Pantalla Insertar", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.it_favoritos) {
+            Toast.makeText(this, "Pantalla Eliminar", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.it_acercaDe) {
+            Toast.makeText(this, "Pantalla Preferencias", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.it_salir) {
+            finishAffinity();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void isNoTareas() {
