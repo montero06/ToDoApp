@@ -23,14 +23,7 @@ public class Tarea implements Parcelable {
         this.fechaObjetivo = fechaObjetivo;
         this.prirotaria = prirotaria;
     }
-    public Tarea(String titulo, String descripcion, int progreso, Date fechaCreacion, Date fechaObjetivo) {
-        this.titulo = titulo;
-        this.descripcion = descripcion;
-        this.progreso = progreso;
-        this.fechaCreacion = fechaCreacion;
-        this.fechaObjetivo = fechaObjetivo;
-        this.prirotaria = false;
-    }
+
 
     protected Tarea(Parcel in) {
         titulo = in.readString();

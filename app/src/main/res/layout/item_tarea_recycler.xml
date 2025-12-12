@@ -1,77 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    card_view:cardCornerRadius="10dp"
-    card_view:cardElevation="4dp">
+    android:layout_margin="10dp"
+    card_view:cardCornerRadius="16dp"
+    card_view:cardElevation="6dp"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:id="@+id/contenedor"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp"
-        android:background="@android:color/white"
-        card_view:layout_constraintStart_toStartOf="parent"
-        card_view:layout_constraintEnd_toEndOf="parent"
-        card_view:layout_constraintTop_toTopOf="parent"
-        card_view:layout_constraintBottom_toBottomOf="parent">
+        android:padding="16dp"
+        android:background="@android:color/white">
 
-
+        <!-- Título -->
         <TextView
             android:id="@+id/tvTitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Título"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#222222"/>
 
+        <!-- Fecha de creación -->
+        <TextView
+            android:id="@+id/tvFechaCreacion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Creada el 01/01/2025"
+            android:textSize="14sp"
+            android:textColor="#777777"
+            android:drawableLeft="@android:drawable/ic_menu_today"
+            android:drawablePadding="6dp" />
 
+        <!-- Barra de progreso -->
         <ProgressBar
             android:id="@+id/progressBar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:layout_marginTop="6dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="10dp"
             android:max="100"
             android:progress="0" />
 
-
         <TextView
             android:id="@+id/tvProgresoPorcentaje"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="0%"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:textColor="#555555"/>
 
-
+        <!-- Descripción -->
         <TextView
             android:id="@+id/tvDescripcion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Descripción" />
+            android:layout_marginTop="10dp"
+            android:text="Descripción"
+            android:textColor="#333333"
+            android:textSize="15sp" />
 
-
+        <!-- Fecha objetivo -->
         <TextView
             android:id="@+id/tvFechaObjetivo"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Fecha objetivo" />
+            android:layout_marginTop="8dp"
+            android:text="Fecha objetivo: 10/01/2025"
+            android:textSize="15sp"
+            android:textColor="#444444"
+            android:drawableLeft="@android:drawable/ic_menu_my_calendar"
+            android:drawablePadding="6dp" />
 
-
+        <!-- Prioritaria -->
         <TextView
             android:id="@+id/tvPrioritaria"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:text="Prioritaria"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:textColor="#B00020" />
+
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

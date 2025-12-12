@@ -22,7 +22,7 @@ public class CrearTareaAtivity extends AppCompatActivity {
 
         // Cargar primer fragmento
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainerCrear, new Fragmento1())
+                .replace(R.id.contenedorFragments, new Fragmento1())
                 .commit();
     }
 
@@ -34,7 +34,7 @@ public class CrearTareaAtivity extends AppCompatActivity {
 
     public void cargarPaso2() {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragmentContainerCrear, new Fragmento2())
+                .replace(R.id.contenedorFragments, new Fragmento2())
                 .addToBackStack(null)
                 .commit();
     }
