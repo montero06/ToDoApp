@@ -64,7 +64,14 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     }
 
     @Override
-    public int getItemCount() {
+    public  int getItemCount() {
         return lista.size();
+    }
+    private OneditarListener editarListener;
+    public interface OneditarListener {
+        void onEdit(Tarea tarea, int position, View view);
+    }
+    public void setOneditarListener(OneditarListener listener) {
+        this.editarListener = listener;
     }
 }

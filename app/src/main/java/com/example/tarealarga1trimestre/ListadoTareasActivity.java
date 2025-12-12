@@ -3,6 +3,7 @@ package com.example.tarealarga1trimestre;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,18 +23,29 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class ListadoTareasActivity extends AppCompatActivity {
-
+    private boolean favoritoPresionado;
     private RecyclerView recycler;
     private TextView textoVacio;
     private ArrayList<Tarea> listaTareas;
     private TareaAdapter adapter;
 
     private ActivityResultLauncher<Intent> crearTareaLauncher;
+    private ActivityResultLauncher<Intent> editarTareaLauncher;
+
+    private int posicionEditando = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listado_tareas);
+
+        // Ocultar título de la barra
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        favoritoPresionado = false;
+
 
         // Obtener siempre la MISMA lista desde el Singleton
         listaTareas = ManagerMetodos.getInstance().getDatos();
@@ -74,11 +86,44 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 }
         );
 
+        // EDITAR
+        editarTareaLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+
+                        if (data != null && data.hasExtra("TAREA_EDITADA") && posicionEditando != -1) {
+
+                            Tarea editada = data.getParcelableExtra("TAREA_EDITADA");
+
+                            if (editada != null) {
+                                // Reemplazar en la lista
+                                listaTareas.set(posicionEditando, editada);
+
+                                // Notificar al adaptador
+                                adapter.notifyItemChanged(posicionEditando);
+                                isNoTareas();
+                            }
+                        }
+                    }
+                }
+        );
+
         // Botón para crear tarea
         FloatingActionButton btnCrearTarea = findViewById(R.id.btnAgregarTarea);
         btnCrearTarea.setOnClickListener(v -> {
             Intent intent = new Intent(this, CrearTareaAtivity.class);
             crearTareaLauncher.launch(intent);
+        });
+
+        adapter.setOneditarListener((tarea, position, view) -> {
+            posicionEditando = position;
+
+            Intent intent = new Intent(this, EditarTareaActivity.class);
+            intent.putExtra("TAREA_EDITAR", tarea);
+
+            editarTareaLauncher.launch(intent);
         });
     }
 
@@ -94,17 +139,44 @@ public class ListadoTareasActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id=item.getItemId();
+        if (item.getItemId() == android.R.id.home){
+            finish();
+            return true;
+        }
+
         if (id == R.id.it_addTarea) {
-            Toast.makeText(this, "Pantalla Insertar", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, CrearTareaAtivity.class);
+            crearTareaLauncher.launch(intent);
         } else if (id == R.id.it_favoritos) {
-            Toast.makeText(this, "Pantalla Eliminar", Toast.LENGTH_SHORT).show();
+            favoritoPresionado = !favoritoPresionado;
+            if (favoritoPresionado == true){
+                ArrayList<Tarea> listaTareasFavoritas = new ArrayList<>();
+
+                for (Tarea tarea:listaTareas) {
+                    if (tarea.getPrioritaria()){
+                        listaTareasFavoritas.add(tarea);
+                    }
+                }
+
+                adapter = new TareaAdapter(listaTareasFavoritas);
+                recycler.setAdapter(adapter);
+            }else {
+                adapter = new TareaAdapter(listaTareas);
+                recycler.setAdapter(adapter);
+            }
         } else if (id == R.id.it_acercaDe) {
-            Toast.makeText(this, "Pantalla Preferencias", Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder alertaAcercaNosotros = new AlertDialog.Builder(this);
+            alertaAcercaNosotros.setMessage("Esta aplicacion a sido creada por Juan Montero llamada Taskeitos en 2025 :)");
+            alertaAcercaNosotros.setPositiveButton(R.string.ok,null);
+            AlertDialog alertaAcerca = alertaAcercaNosotros.create();
+            alertaAcerca.show();
         } else if (id == R.id.it_salir) {
             finishAffinity();
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
     private void isNoTareas() {
         if (listaTareas.isEmpty()) {

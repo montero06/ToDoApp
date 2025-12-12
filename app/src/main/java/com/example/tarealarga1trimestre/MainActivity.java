@@ -24,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Ocultar título de la barra
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
         Button btnEmpezar = findViewById(R.id.btn_Empezar);
 
         btnEmpezar.setOnClickListener(new View.OnClickListener() {
