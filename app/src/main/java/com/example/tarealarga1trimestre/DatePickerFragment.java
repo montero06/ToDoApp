@@ -1,7 +1,5 @@
 package com.example.tarealarga1trimestre;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -9,13 +7,12 @@ import android.widget.DatePicker;
 
 import androidx.fragment.app.DialogFragment;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 
 public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
     public interface OnDateSelected {
-        void onDate(Date date);
+        void onDate(LocalDate date);
     }
 
     private final OnDateSelected listener;
@@ -26,23 +23,21 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Calendar c = Calendar.getInstance();
+        LocalDate hoy = LocalDate.now();
 
         return new DatePickerDialog(
                 requireContext(),
                 this,
-                c.get(Calendar.YEAR),
-                c.get(Calendar.MONTH),
-                c.get(Calendar.DAY_OF_MONTH)
+                hoy.getYear(),
+                hoy.getMonthValue() - 1,   // DatePicker usa meses 0–11
+                hoy.getDayOfMonth()
         );
     }
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int day) {
-        Calendar c = Calendar.getInstance();
-        c.set(year, month, day);
-        listener.onDate(c.getTime());
+        // month viene 0–11 del DatePicker → convertir a 1–12
+        LocalDate fecha = LocalDate.of(year, month + 1, day);
+        listener.onDate(fecha);
     }
 }
-
-

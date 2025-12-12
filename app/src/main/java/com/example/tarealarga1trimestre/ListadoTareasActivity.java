@@ -16,9 +16,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 public class ListadoTareasActivity extends AppCompatActivity {
 
@@ -84,43 +81,32 @@ public class ListadoTareasActivity extends AppCompatActivity {
     private void isNoTareas() {
         if (listaTareas.isEmpty()) {
             recycler.setVisibility(View.GONE);
-            textoVacio.setVisibility(View.VISIBLE);
+            textoVacio.setVisibility(TextView.VISIBLE);
         } else {
             recycler.setVisibility(View.VISIBLE);
             textoVacio.setVisibility(View.GONE);
         }
     }
 
-    // este metodo a sido creado con ia aunque he aprendido a usar la clase calendar y
-    //
-
     private ArrayList<Tarea> generarTareasEjemplo() {
         ArrayList<Tarea> tareas = new ArrayList<>();
 
-        Date hoy = new Date(); // fecha de creación
+        // Fecha de creación: hoy
+        LocalDate hoy = LocalDate.now();
 
-        // Crear fechas objetivo
-        Calendar cal = Calendar.getInstance();
+        // Fechas objetivo
+        LocalDate objetivo1 = LocalDate.of(2025, 1, 30);
+        LocalDate objetivo2 = LocalDate.now();              // hoy
+        LocalDate objetivo3 = LocalDate.now().plusDays(5);  // +5 días
 
-        cal.set(2025, Calendar.JANUARY, 30);
-        Date objetivo1 = cal.getTime();
-
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 0);
-        Date objetivo2 = cal.getTime();
-
-        cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, 5);
-        Date objetivo3 = cal.getTime();
-
-        // Crear tareas usando el nuevo constructor (con prioridad)
+        // Crear tareas usando LocalDate y el constructor nuevo
         tareas.add(new Tarea(
                 "Estudiar Android",
                 "Repasar RecyclerView",
                 50,
                 hoy,
                 objetivo1,
-                true     // tarea prioritaria
+                true
         ));
 
         tareas.add(new Tarea(
@@ -129,7 +115,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 100,
                 hoy,
                 objetivo2,
-                false    // no prioritaria
+                false
         ));
 
         tareas.add(new Tarea(
@@ -138,12 +124,9 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 20,
                 hoy,
                 objetivo3,
-                true     // prioritaria
+                true
         ));
 
         return tareas;
     }
-
-
 }
-

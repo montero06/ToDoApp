@@ -15,20 +15,22 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 public class Fragmento1 extends Fragment {
 
-    private EditText edt_titulo , edt_fechaCreacion, edt_fecjaObj;
-
+    private EditText edt_titulo, edt_fechaCreacion, edt_fechaObjetivo;
     private Spinner sp_progreso;
-
     private CheckBox cb_prioritaria;
-
     private FormularioViewModel viewModel;
+
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.getDefault());
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
         return inflater.inflate(R.layout.activity_crar_fragmento_1, container, false);
     }
 
@@ -40,7 +42,7 @@ public class Fragmento1 extends Fragment {
 
         edt_titulo = view.findViewById(R.id.edtTitulo);
         edt_fechaCreacion = view.findViewById(R.id.edtFechaCreacion);
-        edt_fecjaObj = view.findViewById(R.id.edtFechaObjetivo);
+        edt_fechaObjetivo = view.findViewById(R.id.edtFechaObjetivo);
         sp_progreso = view.findViewById(R.id.spinnerProgreso);
         cb_prioritaria = view.findViewById(R.id.cbPrioritaria);
 
@@ -53,12 +55,11 @@ public class Fragmento1 extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_progreso.setAdapter(adapter);
 
-        // Precargar datos si existen
         precargarDatos();
 
         // DatePickers
-        edt_fechaCreacion.setOnClickListener(v -> mostrarDatePicker(edt_fechaCreacion));
-        edt_fecjaObj.setOnClickListener(v -> mostrarDatePicker(edt_fecjaObj));
+        edt_fechaCreacion.setOnClickListener(v -> mostrarDatePicker(edt_fechaCreacion, true));
+        edt_fechaObjetivo.setOnClickListener(v -> mostrarDatePicker(edt_fechaObjetivo, false));
 
         // Botón siguiente
         view.findViewById(R.id.btnSiguiente).setOnClickListener(v -> {
@@ -81,30 +82,34 @@ public class Fragmento1 extends Fragment {
         });
     }
 
-    private void mostrarDatePicker(EditText campo) {
+    private void mostrarDatePicker(EditText editText, boolean esFechaCreacion) {
         DatePickerFragment picker = new DatePickerFragment(date -> {
-            campo.setText(date.toString());
-            if (campo == edt_fechaCreacion) viewModel.fechaCreacion.setValue(date);
-            if (campo == edt_fechaCreacion) viewModel.fechaObjetivo.setValue(date);
+            editText.setText(date.format(formatter));
+            if (esFechaCreacion) {
+                viewModel.fechaCreacion.setValue(date);
+            } else {
+                viewModel.fechaObjetivo.setValue(date);
+            }
         });
         picker.show(getParentFragmentManager(), "datePicker");
     }
+
     private void precargarDatos() {
         if (viewModel.titulo.getValue() != null)
             edt_titulo.setText(viewModel.titulo.getValue());
 
         if (viewModel.fechaCreacion.getValue() != null)
-            edt_fechaCreacion.setText(viewModel.fechaCreacion.getValue().toString());
+            edt_fechaCreacion.setText(viewModel.fechaCreacion.getValue().format(formatter));
 
         if (viewModel.fechaObjetivo.getValue() != null)
-            edt_fecjaObj.setText(viewModel.fechaObjetivo.getValue().toString());
+            edt_fechaObjetivo.setText(viewModel.fechaObjetivo.getValue().format(formatter));
 
         if (viewModel.prioritaria.getValue() != null)
             cb_prioritaria.setChecked(viewModel.prioritaria.getValue());
 
         if (viewModel.progreso.getValue() != null) {
             int progreso = viewModel.progreso.getValue();
-            int pos = progreso / 25; // porque usamos {0,25,50,75,100}
+            int pos = progreso / 25;
             sp_progreso.setSelection(pos);
         }
     }

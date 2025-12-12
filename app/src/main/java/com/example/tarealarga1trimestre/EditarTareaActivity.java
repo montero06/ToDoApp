@@ -19,6 +19,7 @@ public class EditarTareaActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(FormularioViewModel.class);
 
+        // Obtener la tarea pasada desde el Intent
         tareaOriginal = getIntent().getParcelableExtra("TAREA_EDITAR");
 
         if (tareaOriginal != null) {
@@ -38,12 +39,12 @@ public class EditarTareaActivity extends AppCompatActivity {
         viewModel.progreso.setValue(tareaOriginal.getProgreso());
         viewModel.fechaCreacion.setValue(tareaOriginal.getFechaCreacion());
         viewModel.fechaObjetivo.setValue(tareaOriginal.getFechaObjetivo());
-        viewModel.prioritaria.setValue(tareaOriginal.getPrirotaria());
+        viewModel.prioritaria.setValue(tareaOriginal.getPrioritaria());
     }
 
     public void guardarTareaEditada(Tarea modificada) {
         Intent data = new Intent();
-        data.putExtra("TAREA_EDITADA", modificada);
+        data.putExtra("TAREA_EDITADA", modificada); // LocalDate ya convertido dentro de Tarea Parcelable
         setResult(Activity.RESULT_OK, data);
         finish();
     }

@@ -10,12 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHolder> {
 
     private List<Tarea> lista;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public TareaAdapter(List<Tarea> lista) {
         this.lista = lista;
@@ -55,12 +56,11 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         holder.tvProgreso.setText(t.getProgreso() + "%");
         holder.progressBar.setProgress(t.getProgreso());
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        SimpleDateFormat asd = new SimpleDateFormat("dd/MM/yyyy");
-        holder.tvFechaObjetivo.setText("Objetivo: " + sdf.format(t.getFechaObjetivo()));
-        holder.tvFechaInicio.setText("Objetivo: " + asd.format(t.getFechaCreacion()));
+        // Usar LocalDate y DateTimeFormatter
+        holder.tvFechaObjetivo.setText("Objetivo: " + t.getFechaObjetivo().format(formatter));
+        holder.tvFechaInicio.setText("Creación: " + t.getFechaCreacion().format(formatter));
 
-        holder.tvPrioritaria.setText(t.getPrirotaria() ? "PRIORITARIA" : "Normal");
+        holder.tvPrioritaria.setText(t.getPrioritaria() != null && t.getPrioritaria() ? "PRIORITARIA" : "Normal");
     }
 
     @Override

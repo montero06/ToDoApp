@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.util.Date;
 public class CrearTareaAtivity extends AppCompatActivity {
 
     FormularioViewModel viewModel;
@@ -26,11 +25,9 @@ public class CrearTareaAtivity extends AppCompatActivity {
                 .commit();
     }
 
-
     public void volverPaso1() {
         getSupportFragmentManager().popBackStack();
     }
-
 
     public void cargarPaso2() {
         getSupportFragmentManager().beginTransaction()
@@ -39,19 +36,10 @@ public class CrearTareaAtivity extends AppCompatActivity {
                 .commit();
     }
 
-
     public void guardarTareaYSalir(Tarea nueva) {
         Intent data = new Intent();
         data.putExtra("TAREA_NUEVA", nueva);
         setResult(RESULT_OK, data);
-
-        finish(); // ¡ESTO ES SUFICIENTE!
-
+        finish();
     }
-
-
-
-
 }
-
-

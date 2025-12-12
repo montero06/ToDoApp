@@ -5,32 +5,36 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Tarea implements Parcelable {
-    private String titulo ;
+    private String titulo;
     private String descripcion;
-    private int progreso ;
-    private Date fechaCreacion;
-    private Date fechaObjetivo;
-    private Boolean prirotaria;
+    private int progreso;
+    private LocalDate fechaCreacion;
+    private LocalDate fechaObjetivo;
+    private Boolean prioritaria;
 
-    public Tarea(String titulo, String descripcion, int progreso, Date fechaCreacion, Date fechaObjetivo, Boolean prirotaria) {
+    public Tarea(String titulo, String descripcion, int progreso,
+                 LocalDate fechaCreacion, LocalDate fechaObjetivo, Boolean prioritaria) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.progreso = progreso;
         this.fechaCreacion = fechaCreacion;
         this.fechaObjetivo = fechaObjetivo;
-        this.prirotaria = prirotaria;
+        this.prioritaria = prioritaria;
     }
-
 
     protected Tarea(Parcel in) {
         titulo = in.readString();
         descripcion = in.readString();
         progreso = in.readInt();
-        byte tmpPrirotaria = in.readByte();
-        prirotaria = tmpPrirotaria == 0 ? null : tmpPrirotaria == 1;
+        String fechaCreacionStr = in.readString();
+        String fechaObjetivoStr = in.readString();
+        fechaCreacion = fechaCreacionStr != null ? LocalDate.parse(fechaCreacionStr) : null;
+        fechaObjetivo = fechaObjetivoStr != null ? LocalDate.parse(fechaObjetivoStr) : null;
+        byte tmpPrioritaria = in.readByte();
+        prioritaria = tmpPrioritaria == 0 ? null : tmpPrioritaria == 1;
     }
 
     public static final Creator<Tarea> CREATOR = new Creator<Tarea>() {
@@ -45,65 +49,34 @@ public class Tarea implements Parcelable {
         }
     };
 
-    public String getTitulo() {
-        return titulo;
-    }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
+    public int getProgreso() { return progreso; }
+    public void setProgreso(int progreso) { this.progreso = progreso; }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+    public LocalDate getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDate fechaCreacion) { this.fechaCreacion = fechaCreacion; }
 
-    public int getProgreso() {
-        return progreso;
-    }
+    public LocalDate getFechaObjetivo() { return fechaObjetivo; }
+    public void setFechaObjetivo(LocalDate fechaObjetivo) { this.fechaObjetivo = fechaObjetivo; }
 
-    public void setProgreso(int progreso) {
-        this.progreso = progreso;
-    }
-
-    public Date getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(Date fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public Date getFechaObjetivo() {
-        return fechaObjetivo;
-    }
-
-    public void setFechaObjetivo(Date fechaObjetivo) {
-        this.fechaObjetivo = fechaObjetivo;
-    }
-
-    public Boolean getPrirotaria() {
-        return prirotaria;
-    }
-
-
-    public void setPrirotaria(Boolean prirotaria) {
-        this.prirotaria = prirotaria;
-    }
+    public Boolean getPrioritaria() { return prioritaria; }
+    public void setPrioritaria(Boolean prioritaria) { this.prioritaria = prioritaria; }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
+    public int describeContents() { return 0; }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(titulo);
         dest.writeString(descripcion);
         dest.writeInt(progreso);
-        dest.writeByte((byte) (prirotaria == null ? 0 : prirotaria ? 1 : 2));
+        dest.writeString(fechaCreacion != null ? fechaCreacion.toString() : null);
+        dest.writeString(fechaObjetivo != null ? fechaObjetivo.toString() : null);
+        dest.writeByte((byte) (prioritaria == null ? 0 : prioritaria ? 1 : 2));
     }
 }

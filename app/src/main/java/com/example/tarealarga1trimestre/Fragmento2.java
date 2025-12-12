@@ -11,11 +11,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Fragmento2 extends Fragment {
     private EditText edtDescripcion;
-
     private FormularioViewModel viewModel;
 
     @Override
@@ -47,13 +46,14 @@ public class Fragmento2 extends Fragment {
         if (viewModel.descripcion.getValue() != null)
             edtDescripcion.setText(viewModel.descripcion.getValue());
     }
+
     private void guardar() {
-        String titulo = viewModel.titulo.getValue();
+        String titulo = viewModel.titulo.getValue() != null ? viewModel.titulo.getValue() : "Sin título";
         String descripcion = edtDescripcion.getText().toString();
-        int progreso = viewModel.progreso.getValue();
-        Date fechaCreacion = viewModel.fechaCreacion.getValue();
-        Date fechaObjetivo = viewModel.fechaObjetivo.getValue();
-        boolean prioritaria = viewModel.prioritaria.getValue();
+        int progreso = viewModel.progreso.getValue() != null ? viewModel.progreso.getValue() : 0;
+        LocalDate fechaCreacion = viewModel.fechaCreacion.getValue() != null ? viewModel.fechaCreacion.getValue() : LocalDate.now();
+        LocalDate fechaObjetivo = viewModel.fechaObjetivo.getValue() != null ? viewModel.fechaObjetivo.getValue() : LocalDate.now();
+        boolean prioritaria = viewModel.prioritaria.getValue() != null && viewModel.prioritaria.getValue();
 
         Tarea tarea = new Tarea(titulo, descripcion, progreso, fechaCreacion, fechaObjetivo, prioritaria);
 
@@ -62,10 +62,5 @@ public class Fragmento2 extends Fragment {
         } else if (requireActivity() instanceof EditarTareaActivity) {
             ((EditarTareaActivity) requireActivity()).guardarTareaEditada(tarea);
         }
-
-
     }
-
-
-
 }
