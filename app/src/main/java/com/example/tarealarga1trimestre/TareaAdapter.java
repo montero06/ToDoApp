@@ -22,7 +22,7 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     }
 
     public static class TareaViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitulo, tvDescripcion, tvProgreso, tvFechaObjetivo, tvPrioritaria;
+        TextView tvTitulo, tvDescripcion, tvProgreso, tvFechaObjetivo, tvPrioritaria, tvFechaInicio;
         ProgressBar progressBar;
 
         @SuppressLint("WrongViewCast")
@@ -34,6 +34,7 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
             tvFechaObjetivo = itemView.findViewById(R.id.tvFechaObjetivo);
             tvPrioritaria = itemView.findViewById(R.id.tvPrioritaria);
             progressBar = itemView.findViewById(R.id.progressBar);
+            tvFechaInicio = itemView.findViewById(R.id.tvFechaCreacion);
         }
     }
 
@@ -55,7 +56,9 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         holder.progressBar.setProgress(t.getProgreso());
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat asd = new SimpleDateFormat("dd/MM/yyyy");
         holder.tvFechaObjetivo.setText("Objetivo: " + sdf.format(t.getFechaObjetivo()));
+        holder.tvFechaInicio.setText("Objetivo: " + asd.format(t.getFechaCreacion()));
 
         holder.tvPrioritaria.setText(t.getPrirotaria() ? "PRIORITARIA" : "Normal");
     }

@@ -89,6 +89,7 @@ public class Tarea implements Parcelable {
         return prirotaria;
     }
 
+
     public void setPrirotaria(Boolean prirotaria) {
         this.prirotaria = prirotaria;
     }

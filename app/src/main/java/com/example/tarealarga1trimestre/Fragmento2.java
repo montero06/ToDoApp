@@ -62,6 +62,8 @@ public class Fragmento2 extends Fragment {
         } else if (requireActivity() instanceof EditarTareaActivity) {
             ((EditarTareaActivity) requireActivity()).guardarTareaEditada(tarea);
         }
+
+
     }
 
 
