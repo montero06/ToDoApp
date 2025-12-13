@@ -10,14 +10,14 @@
         android:id="@+id/txtTituloEditar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Editar tarea"
-        android:textSize="24sp"
-        android:textStyle="bold"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
+        android:text="@string/editarTarea"
         android:textColor="#222222"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/contenedorEdicion"

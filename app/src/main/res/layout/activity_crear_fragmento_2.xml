@@ -20,21 +20,21 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Descripción completa"
+                android:layout_marginBottom="8dp"
+                android:text="@string/DescripcionCompleta"
                 android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/edtDescripcion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Escribe la descripción..."
-                android:minLines="8"
-                android:gravity="top"
-                android:inputType="textMultiLine"
                 android:background="@drawable/bg_input"
-                android:padding="12dp"/>
+                android:gravity="top"
+                android:hint="@string/escribeDescribcion"
+                android:inputType="textMultiLine"
+                android:minLines="8"
+                android:padding="12dp" />
         </LinearLayout>
     </ScrollView>
 
@@ -48,8 +48,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Volver"
-            android:background="@drawable/bg_button" />
+            android:background="@drawable/bg_button"
+            android:text="@string/btn_volver" />
 
         <View
             android:layout_width="16dp"
@@ -60,8 +60,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Guardar"
-            android:background="@drawable/bg_button" />
+            android:background="@drawable/bg_button"
+            android:text="@string/btn_Guarfar" />
     </LinearLayout>
 
 </LinearLayout>

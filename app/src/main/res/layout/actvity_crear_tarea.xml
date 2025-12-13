@@ -12,12 +12,12 @@
         android:id="@+id/tvTituloActividad"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Crear tarea"
+        android:text="@string/crearTarea"
         android:textSize="22sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Contenedor para los fragments (dentro de un LinearLayout según requisito) -->
     <LinearLayout

@@ -2,4 +2,19 @@
 <resources>
     <string name="ok">ok</string>
     <string name="cm_eliminar">Eliminar</string>
+    <string name="fechaCreacionfratg1">Fecha de creación</string>
+    <string name="fechaObjfrag1">Fecha Obj</string>
+    <string name="Prioritaria">Prioritaria</string>
+    <string name="btn_siguiente">siguiente</string>
+    <string name="DescripcionCompleta">Descripción Completa\n</string>
+    <string name="escribeDescribcion">Escribe Descripción</string>
+    <string name="btn_volver">Volver</string>
+    <string name="btn_Guarfar">Guardar</string>
+    <string name="editarTarea">Editar tarea</string>
+    <string name="crearTarea">Crear Tarea</string>
+    <string name="titulo">Titulo</string>
+    <string name="Descripcion">Descripcion</string>
+    <string name="FerchaObj">Fecha objetivo: 10/01/2025</string>
+    <string name="Prioritarias">prioritaria</string>
+    <string name="añadirTarea">Añadir tarea</string>
 </resources>

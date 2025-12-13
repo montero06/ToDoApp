@@ -17,6 +17,7 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
 
     private List<Tarea> lista;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private OneditarListener editarListener;
 
     public TareaAdapter(List<Tarea> lista) {
         this.lista = lista;
@@ -56,21 +57,29 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         holder.tvProgreso.setText(t.getProgreso() + "%");
         holder.progressBar.setProgress(t.getProgreso());
 
-        // Usar LocalDate y DateTimeFormatter
         holder.tvFechaObjetivo.setText("Objetivo: " + t.getFechaObjetivo().format(formatter));
         holder.tvFechaInicio.setText("Creación: " + t.getFechaCreacion().format(formatter));
-
         holder.tvPrioritaria.setText(t.getPrioritaria() != null && t.getPrioritaria() ? "PRIORITARIA" : "Normal");
+
+        // Long click para menú contextual
+        holder.itemView.setOnLongClickListener(v -> {
+            if (editarListener != null) {
+                editarListener.onEdit(t, position, v);
+            }
+            return true;
+        });
     }
 
     @Override
-    public  int getItemCount() {
+    public int getItemCount() {
         return lista.size();
     }
-    private OneditarListener editarListener;
+
+    // Interfaz para comunicar el long click a la Activity
     public interface OneditarListener {
         void onEdit(Tarea tarea, int position, View view);
     }
+
     public void setOneditarListener(OneditarListener listener) {
         this.editarListener = listener;
     }

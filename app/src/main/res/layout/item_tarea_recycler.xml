@@ -21,10 +21,10 @@
             android:id="@+id/tvTitulo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Título"
+            android:text="@string/titulo"
+            android:textColor="#222222"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#222222"/>
+            android:textStyle="bold" />
 
         <!-- Fecha de creación -->
         <TextView
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Descripción"
+            android:text="@string/Descripcion"
             android:textColor="#333333"
             android:textSize="15sp" />
 
@@ -73,11 +73,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Fecha objetivo: 10/01/2025"
-            android:textSize="15sp"
-            android:textColor="#444444"
             android:drawableLeft="@android:drawable/ic_menu_my_calendar"
-            android:drawablePadding="6dp" />
+            android:drawablePadding="6dp"
+            android:text="@string/FerchaObj"
+            android:textColor="#444444"
+            android:textSize="15sp" />
 
         <!-- Prioritaria -->
         <TextView
@@ -85,10 +85,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Prioritaria"
-            android:textStyle="bold"
+            android:text="@string/Prioritarias"
+            android:textColor="#B00020"
             android:textSize="15sp"
-            android:textColor="#B00020" />
+            android:textStyle="bold" />
 
     </LinearLayout>
 

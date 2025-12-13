@@ -11,18 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class ListadoTareasActivity extends AppCompatActivity {
+
     private boolean favoritoPresionado;
     private RecyclerView recycler;
     private TextView textoVacio;
@@ -32,7 +31,8 @@ public class ListadoTareasActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> crearTareaLauncher;
     private ActivityResultLauncher<Intent> editarTareaLauncher;
 
-    private int posicionEditando = -1;
+    // Para saber qué ítem fue pulsado en el menú contextual
+    private int posicionContextual = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,17 +46,19 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
         favoritoPresionado = false;
 
-
         // Obtener siempre la MISMA lista desde el Singleton
         listaTareas = ManagerMetodos.getInstance().getDatos();
 
         recycler = findViewById(R.id.recyclerTareas);
         textoVacio = findViewById(R.id.textoVacio);
 
-        // Crear adapter usando la misma lista (misma referencia)
+        // Crear adapter usando la misma lista
         adapter = new TareaAdapter(listaTareas);
         recycler.setAdapter(adapter);
         recycler.setLayoutManager(new LinearLayoutManager(this));
+
+        // Registrar RecyclerView para menú contextual
+        registerForContextMenu(recycler);
 
         isNoTareas();
 
@@ -66,18 +68,11 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
-
                         if (data != null && data.hasExtra("TAREA_NUEVA")) {
-
                             Tarea nueva = data.getParcelableExtra("TAREA_NUEVA");
-
                             if (nueva != null) {
-                                // Añadir a la lista del Singleton (MISMA lista del adapter)
                                 ManagerMetodos.getInstance().addTarea(nueva);
-
-                                // Notificar al adapter
                                 adapter.notifyItemInserted(0);
-
                                 recycler.scrollToPosition(0);
                                 isNoTareas();
                             }
@@ -86,23 +81,17 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 }
         );
 
-        // EDITAR
+        // Registrar launcher para editar tareas
         editarTareaLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Intent data = result.getData();
-
-                        if (data != null && data.hasExtra("TAREA_EDITADA") && posicionEditando != -1) {
-
+                        if (data != null && data.hasExtra("TAREA_EDITADA") && posicionContextual != -1) {
                             Tarea editada = data.getParcelableExtra("TAREA_EDITADA");
-
                             if (editada != null) {
-                                // Reemplazar en la lista
-                                listaTareas.set(posicionEditando, editada);
-
-                                // Notificar al adaptador
-                                adapter.notifyItemChanged(posicionEditando);
+                                listaTareas.set(posicionContextual, editada);
+                                adapter.notifyItemChanged(posicionContextual);
                                 isNoTareas();
                             }
                         }
@@ -111,122 +100,95 @@ public class ListadoTareasActivity extends AppCompatActivity {
         );
 
         // Botón para crear tarea
-        FloatingActionButton btnCrearTarea = findViewById(R.id.btnAgregarTarea);
-        btnCrearTarea.setOnClickListener(v -> {
+        findViewById(R.id.btnAgregarTarea).setOnClickListener(v -> {
             Intent intent = new Intent(this, CrearTareaAtivity.class);
             crearTareaLauncher.launch(intent);
         });
 
+        // Listener para long click en ítem (abrirá menú contextual)
         adapter.setOneditarListener((tarea, position, view) -> {
-            posicionEditando = position;
-
-            Intent intent = new Intent(this, EditarTareaActivity.class);
-            intent.putExtra("TAREA_EDITAR", tarea);
-
-            editarTareaLauncher.launch(intent);
+            posicionContextual = position;
+            view.showContextMenu();  // Aquí se muestra el menú contextual
         });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
-        menu.setGroupVisible(R.id.it_groupIconos,true);
-        menu.setGroupVisible(R.id.it_groupMasOpciones,true);
+        menu.setGroupVisible(R.id.it_groupIconos, true);
+        menu.setGroupVisible(R.id.it_groupMasOpciones, true);
         return super.onCreateOptionsMenu(menu);
     }
 
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id=item.getItemId();
-        if (item.getItemId() == android.R.id.home){
-            finish();
-            return true;
-        }
+        int id = item.getItemId();
 
         if (id == R.id.it_addTarea) {
             Intent intent = new Intent(this, CrearTareaAtivity.class);
             crearTareaLauncher.launch(intent);
         } else if (id == R.id.it_favoritos) {
             favoritoPresionado = !favoritoPresionado;
-            if (favoritoPresionado == true){
+            if (favoritoPresionado) {
                 ArrayList<Tarea> listaTareasFavoritas = new ArrayList<>();
-
-                for (Tarea tarea:listaTareas) {
-                    if (tarea.getPrioritaria()){
+                for (Tarea tarea : listaTareas) {
+                    if (tarea.getPrioritaria()) {
                         listaTareasFavoritas.add(tarea);
                     }
                 }
-
                 adapter = new TareaAdapter(listaTareasFavoritas);
                 recycler.setAdapter(adapter);
-            }else {
+            } else {
                 adapter = new TareaAdapter(listaTareas);
                 recycler.setAdapter(adapter);
             }
         } else if (id == R.id.it_acercaDe) {
-            AlertDialog.Builder alertaAcercaNosotros = new AlertDialog.Builder(this);
-            alertaAcercaNosotros.setMessage("Esta aplicacion a sido creada por Juan Montero llamada Taskeitos en 2025 :)");
-            alertaAcercaNosotros.setPositiveButton(R.string.ok,null);
-            AlertDialog alertaAcerca = alertaAcercaNosotros.create();
-            alertaAcerca.show();
+            new AlertDialog.Builder(this)
+                    .setMessage("Esta aplicación ha sido creada por Juan Montero llamada Taskeitos en 2025 :)")
+                    .setPositiveButton(R.string.ok, null)
+                    .show();
         } else if (id == R.id.it_salir) {
             finishAffinity();
         }
+
         return super.onOptionsItemSelected(item);
     }
 
+    // MENÚ CONTEXTUAL
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getMenuInflater().inflate(R.menu.menu_contextual, menu);
+    }
 
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        if (posicionContextual == -1) return super.onContextItemSelected(item);
+
+        Tarea tarea = listaTareas.get(posicionContextual);
+
+        if (item.getItemId() == R.id.cm_editar) {
+            Intent intent = new Intent(this, EditarTareaActivity.class);
+            intent.putExtra("TAREA_EDITAR", tarea);
+            editarTareaLauncher.launch(intent);
+            return true;
+        } else if (item.getItemId() == R.id.cm_eliminar) {
+            listaTareas.remove(posicionContextual);
+            adapter.notifyItemRemoved(posicionContextual);
+            isNoTareas();
+            return true;
+        } else {
+            return super.onContextItemSelected(item);
+        }
+    }
 
     private void isNoTareas() {
         if (listaTareas.isEmpty()) {
             recycler.setVisibility(View.GONE);
-            textoVacio.setVisibility(TextView.VISIBLE);
+            textoVacio.setVisibility(View.VISIBLE);
         } else {
             recycler.setVisibility(View.VISIBLE);
             textoVacio.setVisibility(View.GONE);
         }
-    }
-
-    private ArrayList<Tarea> generarTareasEjemplo() {
-        ArrayList<Tarea> tareas = new ArrayList<>();
-
-        // Fecha de creación: hoy
-        LocalDate hoy = LocalDate.now();
-
-        // Fechas objetivo
-        LocalDate objetivo1 = LocalDate.of(2025, 1, 30);
-        LocalDate objetivo2 = LocalDate.now();              // hoy
-        LocalDate objetivo3 = LocalDate.now().plusDays(5);  // +5 días
-
-        // Crear tareas usando LocalDate y el constructor nuevo
-        tareas.add(new Tarea(
-                "Estudiar Android",
-                "Repasar RecyclerView",
-                50,
-                hoy,
-                objetivo1,
-                true
-        ));
-
-        tareas.add(new Tarea(
-                "Hacer compras",
-                "Comprar leche, pan",
-                100,
-                hoy,
-                objetivo2,
-                false
-        ));
-
-        tareas.add(new Tarea(
-                "Proyecto final",
-                "Terminar app",
-                20,
-                hoy,
-                objetivo3,
-                true
-        ));
-
-        return tareas;
     }
 }
