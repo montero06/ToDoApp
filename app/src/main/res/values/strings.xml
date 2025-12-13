@@ -22,4 +22,5 @@
     <string name="FerchaObj">Fecha objetivo: 10/01/2025</string>
     <string name="Prioritarias">prioritaria</string>
     <string name="añadirTarea">Añadir tarea</string>
+    <string name="btn_translate">traducir</string>
 </resources>

@@ -1,0 +1,31 @@
+
+
+    <resources>
+        <string name="app_name">LongTask1Trimester</string>
+        <string name="bttn_MainEmpezar">Start!</string>
+        <string name="Acerca_de">About...</string>
+        <string name="salir">Exit</string>
+        <string name="ok">OK</string>
+        <string name="menuContextual">Edit</string>
+        <string name="cm_eliminar">Delete</string>
+        <string name="tituloFragmento1">Task Title</string>
+        <string name="fechaCreacionfratg1">Creation Date</string>
+        <string name="fechaObjfrag1">Target Date</string>
+        <string name="Prioritaria">Priority</string>
+        <string name="btn_siguiente">Next</string>
+        <string name="DescripcionCompleta">Full Description\n</string>
+        <string name="escribeDescribcion">Enter Description</string>
+        <string name="btn_volver">Back</string>
+        <string name="btn_Guarfar">Save</string>
+        <string name="editarTarea">Edit Task</string>
+        <string name="crearTarea">Create Task</string>
+        <string name="titulo">Title</string>
+        <string name="Descripcion">Description</string>
+        <string name="FerchaObj">Target Date: 01/10/2025</string>
+        <string name="Prioritarias">Priority</string>
+        <string name="añadirTarea">Add Task</string>
+        <string name="btn_translate">translate</string>
+
+    </resources>
+
+
