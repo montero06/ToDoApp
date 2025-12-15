@@ -36,7 +36,6 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LocaleHelper.applyLocale(this);; // cambiar de idoma
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listado_tareas);
 

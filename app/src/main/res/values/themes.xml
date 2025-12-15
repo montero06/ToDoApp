@@ -1,17 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-<style name="Base.Theme.TareaLarga1trimestre"
-    parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TareaLarga1trimestre" parent="Theme.Material3.DayNight">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
 
-    <!-- Colores base -->
-    <item name="colorPrimary">@color/primary</item>
-    <item name="colorOnPrimary">@color/on_primary</item>
-
-    <item name="android:colorBackground">@color/background</item>
-    <item name="colorOnBackground">@color/on_background</item>
-
-</style>
-
-<style name="Theme.TareaLarga1trimestre"
-    parent="Base.Theme.TareaLarga1trimestre" />
-
+    <style name="Theme.TareaLarga1trimestre" parent="Base.Theme.TareaLarga1trimestre" />
 </resources>

@@ -14,7 +14,6 @@ public class CrearTareaAtivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LocaleHelper.applyLocale(this); // cambiar de idoma
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actvity_crear_tarea);
 

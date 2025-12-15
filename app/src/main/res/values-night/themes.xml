@@ -1,15 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-
-    <style name="Base.Theme.TareaLarga1trimestre"
-        parent="Theme.Material3.DayNight.NoActionBar">
-
-        <!-- Colores base noche -->
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorOnPrimary">@color/on_primary</item>
-
-        <item name="android:colorBackground">@color/background</item>
-        <item name="colorOnBackground">@color/on_background</item>
-
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TareaLarga1trimestre" parent="Theme.Material3.DayNight">
+        <!-- Customize your dark theme here. -->
+        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
     </style>
-
 </resources>

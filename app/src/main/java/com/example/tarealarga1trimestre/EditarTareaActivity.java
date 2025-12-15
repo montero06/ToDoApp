@@ -15,7 +15,6 @@ public class EditarTareaActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LocaleHelper.applyLocale(this); // cambiar de idoma
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_fragmento_1);
 
