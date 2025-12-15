@@ -3,41 +3,40 @@ package com.example.tarealarga1trimestre;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.widget.DatePicker;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import java.time.LocalDate;
+import java.util.Calendar;
 
-public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+public class DatePickerFragment extends DialogFragment {
 
-    public interface OnDateSelected {
-        void onDate(LocalDate date);
+    public interface OnDateSelectedListener {
+        void onDateSelected(LocalDate date);
     }
 
-    private final OnDateSelected listener;
+    private final OnDateSelectedListener listener;
 
-    public DatePickerFragment(OnDateSelected listener) {
+    public DatePickerFragment(OnDateSelectedListener listener) {
         this.listener = listener;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LocalDate hoy = LocalDate.now();
+        Calendar c = Calendar.getInstance();
 
         return new DatePickerDialog(
                 requireContext(),
-                this,
-                hoy.getYear(),
-                hoy.getMonthValue() - 1,   // DatePicker usa meses 0–11
-                hoy.getDayOfMonth()
+                (view, year, month, dayOfMonth) -> {
+                    // month +1 porque Calendar empieza en 0
+                    LocalDate date = LocalDate.of(year, month + 1, dayOfMonth);
+                    listener.onDateSelected(date);
+                },
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH)
         );
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int month, int day) {
-        // month viene 0–11 del DatePicker → convertir a 1–12
-        LocalDate fecha = LocalDate.of(year, month + 1, day);
-        listener.onDate(fecha);
     }
 }

@@ -1,14 +1,15 @@
 package com.example.tarealarga1trimestre;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,7 +18,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import java.time.LocalDate;
-import java.util.Locale;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 
 public class Fragmento1 extends Fragment {
 
@@ -29,18 +31,24 @@ public class Fragmento1 extends Fragment {
     private FormularioViewModel viewModel;
     private boolean modoEdicion = false;
 
+    private final DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_crar_fragmento_1, container, false);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view,
+                              @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(requireActivity()).get(FormularioViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity())
+                .get(FormularioViewModel.class);
 
         edt_titulo = view.findViewById(R.id.edtTitulo);
         edt_fechaCreacion = view.findViewById(R.id.edtFechaCreacion);
@@ -51,14 +59,20 @@ public class Fragmento1 extends Fragment {
 
         if (requireActivity() instanceof EditarTareaActivity) {
             modoEdicion = true;
-            btnSiguiente.setText("Guardar"); // cambiar texto a “Guardar”
+            btnSiguiente.setText("Guardar");
         }
 
-        // Configurar Spinner
+        // Spinner progreso
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_item,
-                new String[]{"No iniciada", "Iniciada", "Avanzada", "Casi finalizada", "Finalizada"}
+                new String[]{
+                        "No iniciada",
+                        "Iniciada",
+                        "Avanzada",
+                        "Casi finalizada",
+                        "Finalizada"
+                }
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_progreso.setAdapter(adapter);
@@ -66,65 +80,120 @@ public class Fragmento1 extends Fragment {
         precargarDatos();
 
         // DatePickers
-        edt_fechaCreacion.setOnClickListener(v -> mostrarDatePicker(edt_fechaCreacion));
-        edt_fechaObj.setOnClickListener(v -> mostrarDatePicker(edt_fechaObj));
+        edt_fechaCreacion.setOnClickListener(v ->
+                mostrarDatePicker(true)
+        );
 
-        btnSiguiente.setOnClickListener(v -> {
-            if (edt_titulo.getText().toString().isEmpty()) {
-                Toast.makeText(getContext(), "Escribe un título", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        edt_fechaObj.setOnClickListener(v ->
+                mostrarDatePicker(false)
+        );
 
-            // Guardar valores en ViewModel
-            viewModel.titulo.setValue(edt_titulo.getText().toString());
-            viewModel.prioritaria.setValue(cb_prioritaria.isChecked());
-            int[] valores = {0, 25, 50, 75, 100};
-            viewModel.progreso.setValue(valores[sp_progreso.getSelectedItemPosition()]);
-
-            if (modoEdicion && requireActivity() instanceof EditarTareaActivity) {
-                // Guardar directamente
-                LocalDate fechaCreacion = viewModel.fechaCreacion.getValue();
-                LocalDate fechaObjetivo = viewModel.fechaObjetivo.getValue();
-                int progreso = viewModel.progreso.getValue();
-                String descripcion = viewModel.descripcion.getValue();
-
-                Tarea tareaEditada = new Tarea(
-                        viewModel.titulo.getValue(),
-                        descripcion != null ? descripcion : "",
-                        progreso,
-                        fechaCreacion != null ? fechaCreacion : LocalDate.now(),
-                        fechaObjetivo != null ? fechaObjetivo : LocalDate.now(),
-                        viewModel.prioritaria.getValue() != null ? viewModel.prioritaria.getValue() : false
-                );
-
-                ((EditarTareaActivity) requireActivity()).guardarTareaEditada(tareaEditada);
-            } else if (requireActivity() instanceof CrearTareaAtivity) {
-                ((CrearTareaAtivity) requireActivity()).cargarPaso2();
-            }
-        });
+        btnSiguiente.setOnClickListener(v -> guardarONavegar());
     }
 
-    private void mostrarDatePicker(EditText etFecha) {
-        // Aquí abrir tu DatePickerDialog adaptado a LocalDate
-        // y actualizar el EditText y ViewModel correspondiente
+  
+    private void mostrarDatePicker(boolean esFechaCreacion) {
+        Calendar c = Calendar.getInstance();
+
+        new DatePickerDialog(
+                requireContext(),
+                (view, year, month, dayOfMonth) -> {
+                    LocalDate fecha = LocalDate.of(
+                            year,
+                            month + 1,
+                            dayOfMonth
+                    );
+
+                    if (esFechaCreacion) {
+                        viewModel.fechaCreacion.setValue(fecha);
+                        edt_fechaCreacion.setText(fecha.format(formatter));
+                    } else {
+                        viewModel.fechaObjetivo.setValue(fecha);
+                        edt_fechaObj.setText(fecha.format(formatter));
+                    }
+                },
+                c.get(Calendar.YEAR),
+                c.get(Calendar.MONTH),
+                c.get(Calendar.DAY_OF_MONTH)
+        ).show();
     }
 
+
+    private void guardarONavegar() {
+        if (edt_titulo.getText().toString().trim().isEmpty()) {
+            Toast.makeText(
+                    getContext(),
+                    "Escribe un título",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
+        }
+
+        viewModel.titulo.setValue(edt_titulo.getText().toString());
+        viewModel.prioritaria.setValue(cb_prioritaria.isChecked());
+
+        int[] valores = {0, 25, 50, 75, 100};
+        viewModel.progreso.setValue(
+                valores[sp_progreso.getSelectedItemPosition()]
+        );
+
+        if (modoEdicion && requireActivity() instanceof EditarTareaActivity) {
+
+            LocalDate fechaCreacion =
+                    viewModel.fechaCreacion.getValue() != null
+                            ? viewModel.fechaCreacion.getValue()
+                            : LocalDate.now();
+
+            LocalDate fechaObjetivo =
+                    viewModel.fechaObjetivo.getValue() != null
+                            ? viewModel.fechaObjetivo.getValue()
+                            : LocalDate.now();
+
+            String descripcion =
+                    viewModel.descripcion.getValue() != null
+                            ? viewModel.descripcion.getValue()
+                            : "";
+
+            Tarea tareaEditada = new Tarea(
+                    viewModel.titulo.getValue(),
+                    descripcion,
+                    viewModel.progreso.getValue(),
+                    fechaCreacion,
+                    fechaObjetivo,
+                    viewModel.prioritaria.getValue()
+            );
+
+            ((EditarTareaActivity) requireActivity())
+                    .guardarTareaEditada(tareaEditada);
+
+        } else if (requireActivity() instanceof CrearTareaAtivity) {
+            ((CrearTareaAtivity) requireActivity()).cargarPaso2();
+        }
+    }
+
+    // =======================
+    // PRECARGAR DATOS
+    // =======================
     private void precargarDatos() {
+
         if (viewModel.titulo.getValue() != null)
             edt_titulo.setText(viewModel.titulo.getValue());
 
         if (viewModel.fechaCreacion.getValue() != null)
-            edt_fechaCreacion.setText(viewModel.fechaCreacion.getValue().toString());
+            edt_fechaCreacion.setText(
+                    viewModel.fechaCreacion.getValue().format(formatter)
+            );
 
         if (viewModel.fechaObjetivo.getValue() != null)
-            edt_fechaObj.setText(viewModel.fechaObjetivo.getValue().toString());
+            edt_fechaObj.setText(
+                    viewModel.fechaObjetivo.getValue().format(formatter)
+            );
 
         if (viewModel.prioritaria.getValue() != null)
             cb_prioritaria.setChecked(viewModel.prioritaria.getValue());
 
         if (viewModel.progreso.getValue() != null) {
-            int progreso = viewModel.progreso.getValue();
-            int pos = progreso / 25;
+            int pos = viewModel.progreso.getValue() / 25;
             sp_progreso.setSelection(pos);
         }
     }

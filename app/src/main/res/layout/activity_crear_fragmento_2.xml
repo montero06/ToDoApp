@@ -3,64 +3,56 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#F7F7F7">
+    android:padding="16dp">
 
-    <ScrollView
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/Descripcion"
+        android:textColor="@color/texto_input_legible"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- EditText ocupa el espacio restante con layout_weight="1" -->
+    <EditText
+        android:id="@+id/edtDescripcion"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
         android:layout_weight="1"
-        android:paddingBottom="12dp">
+        android:background="#20888888"
+        android:gravity="top|start"
+        android:hint="@string/DescripcionCompleta"
+        android:inputType="textMultiLine"
+        android:padding="10dp"
+        android:textColor="@color/texto_input_legible"
+        android:textColorHint="@color/texto_hint_legible"
+        android:textSize="16sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/DescripcionCompleta"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <EditText
-                android:id="@+id/edtDescripcion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:gravity="top"
-                android:hint="@string/escribeDescribcion"
-                android:inputType="textMultiLine"
-                android:minLines="8"
-                android:padding="12dp" />
-        </LinearLayout>
-    </ScrollView>
-
+    <!-- Contenedor horizontal para los botones -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center">
 
         <Button
             android:id="@+id/btnVolver"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_button"
             android:text="@string/btn_volver" />
-
-        <View
-            android:layout_width="16dp"
-            android:layout_height="match_parent" />
 
         <Button
             android:id="@+id/btnGuardar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_button"
             android:text="@string/btn_Guarfar" />
     </LinearLayout>
 

@@ -23,4 +23,6 @@
     <string name="Prioritarias">prioritaria</string>
     <string name="añadirTarea">Añadir tarea</string>
     <string name="btn_translate">traducir</string>
+    <string name="btn_mode">Cambiar tema</string>
+    <string name="progreso">progreso</string>
 </resources>
