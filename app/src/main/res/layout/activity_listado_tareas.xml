@@ -28,7 +28,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerTareas"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="668dp"
+        android:layout_below="@+id/toolbar"
+        android:layout_marginTop="-1dp" />
 
     <!-- Botón flotante para añadir tareas -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
