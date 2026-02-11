@@ -43,6 +43,9 @@ Image: %2$s
 Audio: %3$s
 Video: %4$s</string>
     <string name="no_disponible">Not available</string>
+
+    <string name="no_hay_app_para_adjunto">No app is available to open this attachment.</string>
+    <string name="error_abrir_adjunto">Could not open the attachment.</string>
 </resources>
 
 
