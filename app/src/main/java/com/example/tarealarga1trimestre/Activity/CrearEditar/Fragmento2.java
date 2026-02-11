@@ -291,13 +291,71 @@ public class Fragmento2 extends Fragment {
     private void addArchivoItem(String tipo, String uri) {
         if (uri == null || uri.trim().isEmpty()) return;
 
+        LinearLayout filaArchivo = new LinearLayout(requireContext());
+        filaArchivo.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ));
+        filaArchivo.setOrientation(LinearLayout.HORIZONTAL);
+
         TextView archivoView = new TextView(requireContext());
         archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, uri));
         archivoView.setTextSize(14f);
         archivoView.setPadding(0, 4, 0, 4);
         archivoView.setClickable(true);
+        archivoView.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f
+        ));
         archivoView.setOnClickListener(v -> abrirArchivo(uri));
-        contenedorArchivos.addView(archivoView);
+
+        Button btnEliminar = new Button(requireContext());
+        btnEliminar.setText(R.string.cm_eliminar);
+        btnEliminar.setOnClickListener(v -> eliminarAdjunto(tipo, uri));
+
+        filaArchivo.addView(archivoView);
+        filaArchivo.addView(btnEliminar);
+        contenedorArchivos.addView(filaArchivo);
+    }
+
+    private void eliminarAdjunto(String tipo, String uri) {
+        eliminarArchivoLocalSiExiste(uri);
+
+        switch (tipo.toLowerCase(Locale.ROOT)) {
+            case "documento":
+                viewModel.setUrlDoc(null);
+                break;
+            case "imagen":
+                viewModel.setUrlImg(null);
+                break;
+            case "audio":
+                viewModel.setUrlAud(null);
+                break;
+            case "video":
+                viewModel.setUrlVid(null);
+                break;
+        }
+
+        renderArchivosAdjuntos();
+    }
+
+    private void eliminarArchivoLocalSiExiste(String uriString) {
+        if (uriString == null || uriString.trim().isEmpty()) return;
+
+        try {
+            Uri uri = Uri.parse(uriString);
+            if (!"file".equalsIgnoreCase(uri.getScheme())) return;
+
+            String ruta = uri.getPath();
+            if (ruta == null || ruta.trim().isEmpty()) return;
+
+            File archivo = new File(ruta);
+            if (archivo.exists()) {
+                archivo.delete();
+            }
+        } catch (Exception ignored) {
+        }
     }
 
 
