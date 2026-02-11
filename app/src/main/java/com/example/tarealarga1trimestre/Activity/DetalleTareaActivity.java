@@ -3,14 +3,17 @@ package com.example.tarealarga1trimestre.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.example.tarealarga1trimestre.Manager.LocaleHelper;
 import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.R;
 
+import java.io.File;
 import java.time.format.DateTimeFormatter;
 
 public class DetalleTareaActivity extends AppCompatActivity {
@@ -62,12 +65,42 @@ public class DetalleTareaActivity extends AppCompatActivity {
 
     private void abrirAdjunto(String uri) {
         try {
+            Uri targetUri = obtenerUriCompartible(uri);
+            if (targetUri == null) return;
+
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(uri));
+            String mimeType = getContentResolver().getType(targetUri);
+            if (mimeType == null) mimeType = obtenerMimeTypeDesdeUri(targetUri);
+            intent.setDataAndType(targetUri, mimeType != null ? mimeType : "*/*");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         } catch (Exception ignored) {
         }
+    }
+
+    private Uri obtenerUriCompartible(String value) {
+        Uri parsed = Uri.parse(value);
+        if ("content".equalsIgnoreCase(parsed.getScheme())) {
+            return parsed;
+        }
+
+        File archivo = "file".equalsIgnoreCase(parsed.getScheme())
+                ? new File(parsed.getPath())
+                : new File(value);
+
+        if (!archivo.exists()) return null;
+
+        return FileProvider.getUriForFile(
+                this,
+                getPackageName() + ".fileprovider",
+                archivo
+        );
+    }
+
+    private String obtenerMimeTypeDesdeUri(Uri uri) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (extension == null || extension.trim().isEmpty()) return null;
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
     }
 
     private String obtenerNombreArchivo(String uri) {
