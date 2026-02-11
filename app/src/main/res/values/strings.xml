@@ -50,4 +50,17 @@ Descripción:
 %6$s
 
 %7$s</string>
+    <string name="estadisticas">Estadísticas</string>
+    <string name="estadisticas_detalle">Total de tareas: %1$d
+Prioritarias: %2$d
+No iniciadas: %3$d
+En progreso: %4$d
+Completadas: %5$d
+Progreso promedio: %6$.1f%%
+Días promedio hasta fecha objetivo: %7$.1f</string>
+    <string name="adjuntos_detalle">Documento: %1$s
+Imagen: %2$s
+Audio: %3$s
+Video: %4$s</string>
+    <string name="no_disponible">No disponible</string>
 </resources>

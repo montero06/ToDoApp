@@ -23,6 +23,9 @@
             android:id="@+id/it_acercaDe"
             android:title="@string/Acerca_de" />
         <item
+            android:id="@+id/it_estadisticas"
+            android:title="@string/estadisticas" />
+        <item
             android:id="@+id/it_salir"
             android:title="@string/salir" />
     </group>

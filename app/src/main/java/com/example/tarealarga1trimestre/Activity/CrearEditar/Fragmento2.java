@@ -23,6 +23,7 @@ import com.example.tarealarga1trimestre.R;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class Fragmento2 extends Fragment {
 
@@ -84,9 +85,13 @@ public class Fragmento2 extends Fragment {
                     viewModel.getTitulo(),
                     viewModel.getDescripcion(),
                     viewModel.getProgreso(),
-                    fechaCreacionLD,
-                    fechaObjetivoLD,
-                    viewModel.isPrioritaria()
+                    fechaCreacionLD != null ? fechaCreacionLD : LocalDate.now(),
+                    fechaObjetivoLD != null ? fechaObjetivoLD : LocalDate.now(),
+                    viewModel.isPrioritaria(),
+                    viewModel.getUrlDoc(),
+                    viewModel.getUrlImg(),
+                    viewModel.getUrlAud(),
+                    viewModel.getUrlVid()
             );
 
             // Enviar a la actividad correspondiente
@@ -145,8 +150,22 @@ public class Fragmento2 extends Fragment {
     // Método para guardar archivo local
     // -------------------------
     private void guardarArchivoLocal(Uri uri, String tipo) {
-        // TODO: implementar almacenamiento local en carpeta de app o SD según preferencias
-        // y registrar ruta en ViewModel o Base de Datos
-        // viewModel.addArchivoAdjunto(tipo, uri.toString());
+                String value = uri.toString();
+        if (tipo == null) return;
+
+        switch (tipo.toLowerCase(Locale.ROOT)) {
+            case "documento":
+                viewModel.setUrlDoc(value);
+                break;
+            case "imagen":
+                viewModel.setUrlImg(value);
+                break;
+            case "audio":
+                viewModel.setUrlAud(value);
+                break;
+            case "video":
+                viewModel.setUrlVid(value);
+                break;
+        }
     }
 }

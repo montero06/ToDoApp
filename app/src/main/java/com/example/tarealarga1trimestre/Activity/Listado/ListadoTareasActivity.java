@@ -23,8 +23,9 @@ import android.widget.TextView;
 import com.example.tarealarga1trimestre.Activity.CrearTareaAtivity;
 import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.Activity.Preferencias.PreferenciasActivity;
+import com.example.tarealarga1trimestre.Data.TaskStats;
+import com.example.tarealarga1trimestre.Data.TareaRepository;
 import com.example.tarealarga1trimestre.Manager.LocaleHelper;
-import com.example.tarealarga1trimestre.Manager.ManagerMetodos;
 import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.Manager.TareaAdapter;
 import com.example.tarealarga1trimestre.Manager.utilLetra;
@@ -39,17 +40,18 @@ public class ListadoTareasActivity extends AppCompatActivity {
     private RecyclerView recycler;
     private TextView textoVacio;
 
-    private ArrayList<Tarea> listaTareas;
-    private ArrayList<Tarea> listaActualVisualizada;
+    private final ArrayList<Tarea> listaTareas = new ArrayList<>();
+    private ArrayList<Tarea> listaActualVisualizada = new ArrayList<>();
 
     private TareaAdapter adapter;
+    private TareaRepository repository;
 
     private ActivityResultLauncher<Intent> crearTareaLauncher;
     private ActivityResultLauncher<Intent> editarTareaLauncher;
 
     private int posicionContextual = -1;
 
-    private final TareaAdapter.OnItemClickListener listenerDetalle = tarea -> mostrarDetallesFragmento2(tarea);
+    private final TareaAdapter.OnItemClickListener listenerDetalle = this::mostrarDetallesFragmento2;
     private final DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final TareaAdapter.OnEditarListener listenerEditar = (tarea, position, view) -> {
@@ -65,12 +67,13 @@ public class ListadoTareasActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listado_tareas);
 
+        repository = new TareaRepository(this);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         favoritoPresionado = false;
-        listaTareas = ManagerMetodos.getInstance().getDatos();
 
         recycler = findViewById(R.id.recyclerTareas);
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -81,11 +84,8 @@ public class ListadoTareasActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(listenerDetalle);
         recycler.setAdapter(adapter);
 
-        actualizarListaVisualizada();
+        observarTareas();
 
-        // ----------------------
-        // Crear tarea
-        // ----------------------
         crearTareaLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -94,18 +94,13 @@ public class ListadoTareasActivity extends AppCompatActivity {
                         if (data != null && data.hasExtra("TAREA_NUEVA")) {
                             Tarea nueva = data.getParcelableExtra("TAREA_NUEVA");
                             if (nueva != null) {
-                                ManagerMetodos.getInstance().addTarea(nueva);
-                                actualizarListaVisualizada();
-                                recycler.scrollToPosition(0);
+                                repository.insert(nueva);
                             }
                         }
                     }
                 }
         );
 
-        // ----------------------
-        // Editar tarea
-        // ----------------------
         editarTareaLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -114,13 +109,10 @@ public class ListadoTareasActivity extends AppCompatActivity {
                         if (data != null && data.hasExtra("TAREA_EDITADA")) {
                             Tarea editada = data.getParcelableExtra("TAREA_EDITADA");
                             int posicion = data.getIntExtra("POSICION", -1);
-                            if (editada != null && posicion != -1) {
-                                // Actualizar en lista principal
+                            if (editada != null && posicion != -1 && posicion < listaActualVisualizada.size()) {
                                 Tarea tareaVieja = listaActualVisualizada.get(posicion);
-                                int indexEnPrincipal = listaTareas.indexOf(tareaVieja);
-                                if (indexEnPrincipal != -1) listaTareas.set(indexEnPrincipal, editada);
-
-                                actualizarListaVisualizada();
+                                editada.setId(tareaVieja.getId());
+                                repository.update(editada);
                             }
                         }
                     }
@@ -133,28 +125,30 @@ public class ListadoTareasActivity extends AppCompatActivity {
         });
     }
 
-    // ----------------------
-    // Actualizar lista visualizada
-    // ----------------------
+    private void observarTareas() {
+        repository.getAllTareas().observe(this, tareas -> {
+            listaTareas.clear();
+            if (tareas != null) {
+                listaTareas.addAll(tareas);
+            }
+            actualizarListaVisualizada();
+        });
+    }
+
     private void actualizarListaVisualizada() {
         ArrayList<Tarea> listaFiltrada = new ArrayList<>();
 
-        // Filtrar por prioridad
         if (favoritoPresionado) {
             for (Tarea t : listaTareas) {
-                if (t.getPrioritaria() != null && t.getPrioritaria()) listaFiltrada.add(t);
+                if (t.isPrioritaria()) listaFiltrada.add(t);
             }
         } else {
             listaFiltrada.addAll(listaTareas);
         }
 
-        // Ordenar según preferencias actuales
         aplicarOrdenacion(listaFiltrada);
 
-        // Guardar lista final
         listaActualVisualizada = listaFiltrada;
-
-        // Actualizar adapter
         adapter.setDatos(listaActualVisualizada);
 
         float textSize = pxToSp(utilLetra.getTamanoLetra(this));
@@ -164,59 +158,41 @@ public class ListadoTareasActivity extends AppCompatActivity {
         isNoTareas();
     }
 
-    // ----------------------
-    // Aplicar ordenación según preferencias guardadas
-    // ----------------------
     private void aplicarOrdenacion(ArrayList<Tarea> lista) {
-        if (lista == null || lista.isEmpty()) return;
+        if (lista.isEmpty()) return;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         String criterio = prefs.getString("criterio", "2");
-        boolean ascendente = prefs.getBoolean("orden", true); // true = ascendente, false = descendente
-
+        boolean ascendente = prefs.getBoolean("orden", true);
 
         lista.sort((t1, t2) -> {
             int cmp = 0;
             switch (criterio) {
-                case "1": cmp = t1.getTitulo().compareToIgnoreCase(t2.getTitulo()); break;
+                case "1":
+                    cmp = t1.getTitulo().compareToIgnoreCase(t2.getTitulo());
+                    break;
                 case "2":
-                    if (t1.getFechaCreacion() != null && t2.getFechaCreacion() != null)
-                        cmp = t1.getFechaCreacion().compareTo(t2.getFechaCreacion());
+                    cmp = t1.getFechaCreacion().compareTo(t2.getFechaCreacion());
                     break;
                 case "3":
-                    if (t1.getFechaObjetivo() != null && t2.getFechaObjetivo() != null)
-                        cmp = t1.getFechaObjetivo().compareTo(t2.getFechaObjetivo());
+                    cmp = t1.getFechaObjetivo().compareTo(t2.getFechaObjetivo());
                     break;
-                case "4": cmp = Integer.compare(t1.getProgreso(), t2.getProgreso()); break;
+                case "4":
+                    cmp = Integer.compare(t1.getProgreso(), t2.getProgreso());
+                    break;
             }
             return ascendente ? cmp : -cmp;
         });
-
-
     }
 
-    // ----------------------
-    // Calcular días restantes para fecha objetivo
-    // ----------------------
-    private long calcularDiasRestantes(Tarea t) {
-        if (t.getFechaObjetivo() == null) return Long.MAX_VALUE;
-        return java.time.temporal.ChronoUnit.DAYS.between(
-                java.time.LocalDate.now(), t.getFechaObjetivo());
-    }
-
-    // ----------------------
-    // onResume: se actualiza lista si se cambia preferencia
-    // ----------------------
     @Override
     protected void onResume() {
         super.onResume();
 
-        // Reaplicar tamaño de letra
         float textSize = pxToSp(utilLetra.getTamanoLetra(this));
         if (adapter != null) adapter.setTamanodeLetra(textSize);
 
-        // Actualizar lista según preferencias actuales
         actualizarListaVisualizada();
 
         textoVacio.setTextSize(textSize);
@@ -227,7 +203,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
     }
 
     private void mostrarDetallesFragmento2(Tarea tarea) {
-        String titulo = (tarea.getTitulo() == null || tarea.getTitulo().trim().isEmpty())
+        String titulo = (tarea.getTitulo().trim().isEmpty())
                 ? getString(R.string.sin_titulo)
                 : tarea.getTitulo();
 
@@ -235,17 +211,19 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 ? getString(R.string.sinDescripcion)
                 : tarea.getDescripcion();
 
-        String fechaCreacion = tarea.getFechaCreacion() != null
-                ? tarea.getFechaCreacion().format(formatterFecha)
-                : getString(R.string.sin_fecha);
+        String fechaCreacion = tarea.getFechaCreacion().format(formatterFecha);
 
-        String fechaObjetivo = tarea.getFechaObjetivo() != null
-                ? tarea.getFechaObjetivo().format(formatterFecha)
-                : getString(R.string.sin_fecha);
+        String fechaObjetivo = tarea.getFechaObjetivo().format(formatterFecha);
 
-        String prioridad = tarea.getPrioritaria() != null && tarea.getPrioritaria()
+        String prioridad = tarea.isPrioritaria()
                 ? getString(R.string.prioridad_alta)
                 : getString(R.string.prioridad_normal);
+
+        String adjuntos = getString(R.string.adjuntos_detalle,
+                valorArchivo(tarea.getUrlDoc()),
+                valorArchivo(tarea.getUrlImg()),
+                valorArchivo(tarea.getUrlAud()),
+                valorArchivo(tarea.getUrlVid()));
 
         String detalles = getString(
                 R.string.detalles_tarea_completa,
@@ -255,7 +233,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 tarea.getProgreso(),
                 prioridad,
                 descripcion,
-                getString(R.string.archivos_no_implementados)
+                adjuntos
         );
 
         new AlertDialog.Builder(this)
@@ -265,9 +243,10 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 .show();
     }
 
-    // ----------------------
-    // Menú superior
-    // ----------------------
+    private String valorArchivo(String value) {
+        return value == null || value.trim().isEmpty() ? getString(R.string.no_disponible) : value;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -293,6 +272,8 @@ public class ListadoTareasActivity extends AppCompatActivity {
                     .setMessage("Esta aplicación ha sido creada por Juan Montero llamada Taskeitos en 2025 :)")
                     .setPositiveButton(R.string.ok, null)
                     .show();
+        } else if (id == R.id.it_estadisticas) {
+            mostrarEstadisticas();
         } else if (id == R.id.it_salir) {
             finishAffinity();
         }
@@ -300,9 +281,25 @@ public class ListadoTareasActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    // ----------------------
-    // Menú contextual
-    // ----------------------
+    private void mostrarEstadisticas() {
+        repository.getStats((TaskStats stats) -> runOnUiThread(() -> {
+            String detalle = getString(R.string.estadisticas_detalle,
+                    stats.getTotal(),
+                    stats.getPrioritarias(),
+                    stats.getNoIniciadas(),
+                    stats.getEnProgreso(),
+                    stats.getCompletadas(),
+                    stats.getProgresoPromedio(),
+                    stats.getDiasPromedioObjetivo());
+
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.estadisticas)
+                    .setMessage(detalle)
+                    .setPositiveButton(R.string.ok, null)
+                    .show();
+        }));
+    }
+
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -311,7 +308,9 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if (posicionContextual == -1) return super.onContextItemSelected(item);
+        if (posicionContextual == -1 || posicionContextual >= listaActualVisualizada.size()) {
+            return super.onContextItemSelected(item);
+        }
 
         Tarea tareaSeleccionada = listaActualVisualizada.get(posicionContextual);
 
@@ -322,15 +321,11 @@ public class ListadoTareasActivity extends AppCompatActivity {
             editarTareaLauncher.launch(intent);
             return true;
         } else if (item.getItemId() == R.id.cm_eliminar) {
-            listaTareas.remove(tareaSeleccionada);
-            actualizarListaVisualizada();
+            repository.delete(tareaSeleccionada);
             return true;
         } else return super.onContextItemSelected(item);
     }
 
-    // ----------------------
-    // Mostrar mensaje si no hay tareas
-    // ----------------------
     private void isNoTareas() {
         if (listaActualVisualizada.isEmpty()) {
             recycler.setVisibility(View.GONE);

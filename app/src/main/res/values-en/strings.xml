@@ -30,6 +30,19 @@
     <string name="detallesFragmento2Titulo">Details (fragment 2): %1$s</string>
     <string name="btn_actualizar_datos">Update data</string>
     <string name="datos_actualizados">Fragment 1 data updated</string>
+    <string name="estadisticas">Statistics</string>
+    <string name="estadisticas_detalle">Total tasks: %1$d
+Priority tasks: %2$d
+Not started: %3$d
+In progress: %4$d
+Completed: %5$d
+Average progress: %6$.1f%%
+Average days to target date: %7$.1f</string>
+    <string name="adjuntos_detalle">Document: %1$s
+Image: %2$s
+Audio: %3$s
+Video: %4$s</string>
+    <string name="no_disponible">Not available</string>
 </resources>
 
 

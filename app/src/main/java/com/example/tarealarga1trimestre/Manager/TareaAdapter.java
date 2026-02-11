@@ -101,7 +101,7 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         if (t.getFechaCreacion() != null)
             holder.tvFechaInicio.setText("Creación: " + t.getFechaCreacion().format(formatter));
 
-        holder.tvPrioritaria.setText(t.getPrioritaria() != null && t.getPrioritaria() ? "PRIORITARIA" : "Normal");
+        holder.tvPrioritaria.setText(t.isPrioritaria() ? "PRIORITARIA" : "Normal");
 
         // Aplicar tamaño de letra dinámico
         holder.tvTitulo.setTextSize(textSizeSp);
