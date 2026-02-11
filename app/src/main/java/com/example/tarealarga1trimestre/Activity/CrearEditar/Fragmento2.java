@@ -23,6 +23,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -31,6 +32,9 @@ import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -55,7 +59,6 @@ public class Fragmento2 extends Fragment {
 
         viewModel = new ViewModelProvider(requireActivity()).get(FormularioViewModel.class);
 
-        // Inicializar vistas
         edtDescripcion = root.findViewById(R.id.edtDescripcion);
         btnVolver = root.findViewById(R.id.btnVolver);
         btnGuardar = root.findViewById(R.id.btnGuardar);
@@ -66,60 +69,6 @@ public class Fragmento2 extends Fragment {
         btnAgregarVideo = root.findViewById(R.id.btnAgregarVideo);
         contenedorArchivos = root.findViewById(R.id.contenedorArchivos);
 
-        // Cargar descripción si ya existe en ViewModel
-        if (viewModel.getDescripcion() != null) {
-            edtDescripcion.setText(viewModel.getDescripcion());
-        }
-
-        // -------------------------
-        // Botones Volver y Guardar
-        // -------------------------
-        btnVolver.setOnClickListener(v -> requireActivity().finish());
-
-        btnGuardar.setOnClickListener(v -> {
-            // Guardar descripción en ViewModel
-            viewModel.setDescripcion(edtDescripcion.getText().toString());
-
-            // Convertir strings de fechas a LocalDate
-            LocalDate fechaCreacionLD = null;
-            LocalDate fechaObjetivoLD = null;
-            try {
-                if (viewModel.getFechaCreacion() != null && !viewModel.getFechaCreacion().isEmpty())
-                    fechaCreacionLD = LocalDate.parse(viewModel.getFechaCreacion(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                if (viewModel.getFechaObjetivo() != null && !viewModel.getFechaObjetivo().isEmpty())
-                    fechaObjetivoLD = LocalDate.parse(viewModel.getFechaObjetivo(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // Crear objeto Tarea
-            Tarea tarea = new Tarea(
-                    viewModel.getTitulo(),
-                    viewModel.getDescripcion(),
-                    viewModel.getProgreso(),
-                    fechaCreacionLD != null ? fechaCreacionLD : LocalDate.now(),
-                    fechaObjetivoLD != null ? fechaObjetivoLD : LocalDate.now(),
-                    viewModel.isPrioritaria(),
-                    viewModel.getUrlDoc(),
-                    viewModel.getUrlImg(),
-                    viewModel.getUrlAud(),
-                    viewModel.getUrlVid()
-            );
-
-            // Enviar a la actividad correspondiente
-            if (requireActivity() instanceof CrearTareaAtivity) {
-                ((CrearTareaAtivity) requireActivity()).guardarTareaYSalir(tarea);
-            } else if (requireActivity() instanceof EditarTareaActivity) {
-                ((EditarTareaActivity) requireActivity()).guardarTareaEditada(tarea);
-            }
-        });
-
-
-
-
-        // -------------------------
-        // Inicializar ActivityResultLauncher para archivos
-        // -------------------------
         archivoLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocument(),
                 uri -> {
@@ -129,15 +78,9 @@ public class Fragmento2 extends Fragment {
                 }
         );
 
-        // -------------------------
-        // Botones de adjuntar archivos
-        // -------------------------
         btnAgregarDocumento.setOnClickListener(v -> {
             tipoArchivoSeleccionado = "documento";
-            archivoLauncher.launch(new String[]{
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+            archivoLauncher.launch(new String[]{"application/pdf","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
         });
 
         btnAgregarImagen.setOnClickListener(v -> {
@@ -156,48 +99,82 @@ public class Fragmento2 extends Fragment {
         });
 
         renderArchivosAdjuntos();
-
         return root;
     }
 
-    // -------------------------
-    // Método para guardar archivo local
-    // -------------------------
+    /* ---------------- GUARDAR COPIA LOCAL ---------------- */
     private void guardarArchivoLocal(Uri uri, String tipo) {
-        String value = uri.toString();
+
         if (tipo == null) return;
 
         try {
-            requireContext().getContentResolver().takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-            );
-        } catch (SecurityException ignored) {
-        }
+            String nombre = obtenerNombreArchivo(uri);
 
-        switch (tipo.toLowerCase(Locale.ROOT)) {
-            case "documento":
-                viewModel.setUrlDoc(value);
-                break;
-            case "imagen":
-                viewModel.setUrlImg(value);
-                break;
-            case "audio":
-                viewModel.setUrlAud(value);
-                break;
-            case "video":
-                viewModel.setUrlVid(value);
-                break;
-        }
+            File carpeta = new File(requireContext().getFilesDir(), "adjuntos");
+            if (!carpeta.exists()) carpeta.mkdirs();
 
-        renderArchivosAdjuntos();
+            File archivoDestino = new File(carpeta, System.currentTimeMillis() + "_" + nombre);
+
+            InputStream in = requireContext().getContentResolver().openInputStream(uri);
+            FileOutputStream out = new FileOutputStream(archivoDestino);
+
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+
+            in.close();
+            out.close();
+
+            String value = archivoDestino.getAbsolutePath();
+
+            switch (tipo.toLowerCase(Locale.ROOT)) {
+                case "documento": viewModel.setUrlDoc(value); break;
+                case "imagen": viewModel.setUrlImg(value); break;
+                case "audio": viewModel.setUrlAud(value); break;
+                case "video": viewModel.setUrlVid(value); break;
+            }
+
+            renderArchivosAdjuntos();
+
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Error copiando archivo", Toast.LENGTH_SHORT).show();
+        }
     }
+
+    private void abrirAdjunto(String path) {
+        try {
+            File file = new File(path);
+
+            Uri uri = FileProvider.getUriForFile(
+                    requireContext(),
+                    requireContext().getPackageName() + ".provider",
+                    file
+            );
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            String mimeType = requireContext().getContentResolver().getType(uri);
+            intent.setDataAndType(uri, mimeType);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                Toast.makeText(requireContext(), R.string.no_hay_app_para_adjunto, Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), R.string.error_abrir_adjunto, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /* ----------- resto de métodos SIN cambios relevantes ----------- */
 
     private void renderArchivosAdjuntos() {
         if (contenedorArchivos == null) return;
 
         contenedorArchivos.removeAllViews();
-
         addArchivoItem(getString(R.string.documento), viewModel.getUrlDoc());
         addArchivoItem(getString(R.string.imagen), viewModel.getUrlImg());
         addArchivoItem(getString(R.string.audio), viewModel.getUrlAud());
@@ -214,18 +191,12 @@ public class Fragmento2 extends Fragment {
 
         TextView archivoView = new TextView(requireContext());
         archivoView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, obtenerNombreArchivo(uri)));
+        archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, new File(uri).getName()));
         archivoView.setTextSize(14f);
         archivoView.setOnClickListener(v -> abrirAdjunto(uri));
-        archivoView.setClickable(true);
-        archivoView.setFocusable(true);
 
         Button btnEliminar = new Button(requireContext());
         btnEliminar.setText(R.string.cm_eliminar);
-        btnEliminar.setAllCaps(false);
-        btnEliminar.setTextSize(12f);
-        btnEliminar.setPadding(dp(12), dp(2), dp(12), dp(2));
-        btnEliminar.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#B00020")));
         btnEliminar.setOnClickListener(v -> {
             eliminarAdjuntoPorTipo(tipo);
             renderArchivosAdjuntos();
@@ -236,69 +207,24 @@ public class Fragmento2 extends Fragment {
         contenedorArchivos.addView(row);
     }
 
-    private void abrirAdjunto(String uri) {
-        try {
-            Uri parsedUri = Uri.parse(uri);
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            String mimeType = requireContext().getContentResolver().getType(parsedUri);
-            if (mimeType != null && !mimeType.trim().isEmpty()) {
-                intent.setDataAndType(parsedUri, mimeType);
-            } else {
-                intent.setData(parsedUri);
-            }
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            PackageManager packageManager = requireContext().getPackageManager();
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent);
-            } else {
-                Toast.makeText(requireContext(), R.string.no_hay_app_para_adjunto, Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), R.string.error_abrir_adjunto, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     private void eliminarAdjuntoPorTipo(String tipo) {
         switch (tipo.toLowerCase(Locale.ROOT)) {
-            case "documento":
-                viewModel.setUrlDoc(null);
-                break;
-            case "imagen":
-                viewModel.setUrlImg(null);
-                break;
-            case "audio":
-                viewModel.setUrlAud(null);
-                break;
-            case "video":
-                viewModel.setUrlVid(null);
-                break;
+            case "documento": viewModel.setUrlDoc(null); break;
+            case "imagen": viewModel.setUrlImg(null); break;
+            case "audio": viewModel.setUrlAud(null); break;
+            case "video": viewModel.setUrlVid(null); break;
         }
     }
 
-    private String obtenerNombreArchivo(String uri) {
-        Uri parsedUri = Uri.parse(uri);
-
+    private String obtenerNombreArchivo(Uri uri) {
         try (android.database.Cursor cursor = requireContext()
                 .getContentResolver()
-                .query(parsedUri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+                .query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
-                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                if (index >= 0) {
-                    String displayName = cursor.getString(index);
-                    if (displayName != null && !displayName.trim().isEmpty()) {
-                        return displayName;
-                    }
-                }
+                return cursor.getString(0);
             }
-        } catch (Exception ignored) {
-        }
-
-        String lastSegment = parsedUri.getLastPathSegment();
-        if (lastSegment == null || lastSegment.trim().isEmpty()) return uri;
-
-        int idx = lastSegment.lastIndexOf('/');
-        return idx >= 0 ? lastSegment.substring(idx + 1) : lastSegment;
+        } catch (Exception ignored) {}
+        return "archivo";
     }
 
     private int dp(int value) {
