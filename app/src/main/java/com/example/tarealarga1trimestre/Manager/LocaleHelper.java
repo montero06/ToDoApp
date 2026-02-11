@@ -1,4 +1,4 @@
-package com.example.tarealarga1trimestre;
+package com.example.tarealarga1trimestre.Manager;
 
 import android.content.Context;
 import android.content.SharedPreferences;

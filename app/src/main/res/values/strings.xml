@@ -25,4 +25,10 @@
     <string name="btn_translate">traducir</string>
     <string name="btn_mode">Cambiar tema</string>
     <string name="progreso">progreso</string>
+    <string name="preferencias">Preferencias</string>
+    <string name="btn_cancelar">Cancelar\n</string>
+    <string name="video">Video</string>
+    <string name="audio">audio</string>
+    <string name="imagen">imagen</string>
+    <string name="documento">documento</string>
 </resources>

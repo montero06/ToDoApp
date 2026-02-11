@@ -17,6 +17,9 @@
     </group>
     <group android:id="@+id/it_groupMasOpciones">
         <item
+            android:id="@+id/it_preferencias"
+            android:title="@string/preferencias" />
+        <item
             android:id="@+id/it_acercaDe"
             android:title="@string/Acerca_de" />
         <item

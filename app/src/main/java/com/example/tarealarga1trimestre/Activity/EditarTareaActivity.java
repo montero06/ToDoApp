@@ -1,4 +1,4 @@
-package com.example.tarealarga1trimestre;
+package com.example.tarealarga1trimestre.Activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -8,27 +8,34 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.tarealarga1trimestre.Activity.CrearEditar.FormularioViewModel;
+import com.example.tarealarga1trimestre.Activity.CrearEditar.Fragmento1;
+import com.example.tarealarga1trimestre.Activity.CrearEditar.Fragmento2;
+import com.example.tarealarga1trimestre.Manager.LocaleHelper;
+import com.example.tarealarga1trimestre.Manager.Tarea;
+import com.example.tarealarga1trimestre.R;
+
 public class EditarTareaActivity extends AppCompatActivity {
 
     private FormularioViewModel viewModel;
     private Tarea tareaOriginal;
+    private int posicion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        LocaleHelper.applyLocale(this); // cambiar de idoma
+        LocaleHelper.applyLocale(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_fragmento_1);
 
         viewModel = new ViewModelProvider(this).get(FormularioViewModel.class);
 
-        // Obtener la tarea pasada desde el Intent
         tareaOriginal = getIntent().getParcelableExtra("TAREA_EDITAR");
+        posicion = getIntent().getIntExtra("POSICION", -1);
 
         if (tareaOriginal != null) {
             precargarDatosEnViewModel();
         }
 
-        // Cargar los 2 fragmentos a la vez (modo edición)
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.contenedorPaso1Editar, new Fragmento1())
                 .replace(R.id.contenedorPaso2Editar, new Fragmento2())
@@ -36,29 +43,27 @@ public class EditarTareaActivity extends AppCompatActivity {
     }
 
     private void precargarDatosEnViewModel() {
-        viewModel.titulo.setValue(tareaOriginal.getTitulo());
-        viewModel.descripcion.setValue(tareaOriginal.getDescripcion());
-        viewModel.progreso.setValue(tareaOriginal.getProgreso());
-        viewModel.fechaCreacion.setValue(tareaOriginal.getFechaCreacion());
-        viewModel.fechaObjetivo.setValue(tareaOriginal.getFechaObjetivo());
-        viewModel.prioritaria.setValue(tareaOriginal.getPrioritaria());
+        viewModel.setTitulo(tareaOriginal.getTitulo());
+        viewModel.setDescripcion(tareaOriginal.getDescripcion());
+        viewModel.setProgreso(tareaOriginal.getProgreso());
+        viewModel.setFechaCreacion(tareaOriginal.getFechaCreacion() != null ?
+                tareaOriginal.getFechaCreacion().toString() : "");
+        viewModel.setFechaObjetivo(tareaOriginal.getFechaObjetivo() != null ?
+                tareaOriginal.getFechaObjetivo().toString() : "");
+        viewModel.setPrioritaria(tareaOriginal.getPrioritaria() != null ?
+                tareaOriginal.getPrioritaria() : false);
     }
 
     public void guardarTareaEditada(Tarea modificada) {
         Intent data = new Intent();
-        data.putExtra("TAREA_EDITADA", modificada); // LocalDate ya convertido dentro de Tarea Parcelable
+        data.putExtra("TAREA_EDITADA", modificada);
+        data.putExtra("POSICION", posicion);
         setResult(Activity.RESULT_OK, data);
         finish();
     }
 
-    // Métodos añadidos para evitar errores en los fragmentos
-    public void cargarPaso2() {
-        // En edición no hay navegación por pasos → no hacer nada
-    }
-
-    public void volverPaso1() {
-        // En edición no hay navegación por pasos → no hacer nada
-    }
+    public void cargarPaso2() {}
+    public void volverPaso1() {}
 
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {

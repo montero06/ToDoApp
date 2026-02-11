@@ -1,4 +1,4 @@
-package com.example.tarealarga1trimestre;
+package com.example.tarealarga1trimestre.Manager;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -14,7 +14,8 @@ public class Tarea implements Parcelable {
     private LocalDate fechaCreacion;
     private LocalDate fechaObjetivo;
     private Boolean prioritaria;
-
+    public Tarea() {
+    }
     public Tarea(String titulo, String descripcion, int progreso,
                  LocalDate fechaCreacion, LocalDate fechaObjetivo, Boolean prioritaria) {
         this.titulo = titulo;

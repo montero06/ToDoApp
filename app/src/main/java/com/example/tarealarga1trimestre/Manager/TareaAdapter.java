@@ -1,4 +1,4 @@
-package com.example.tarealarga1trimestre;
+package com.example.tarealarga1trimestre.Manager;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
@@ -10,7 +10,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.tarealarga1trimestre.R;
+
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHolder> {
@@ -18,18 +21,42 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     private List<Tarea> lista;
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-
     private OnEditarListener editarListener;
 
+    // Tamaño de letra dinámico
+    private float textSizeSp = 14f;
+
     public TareaAdapter(List<Tarea> lista) {
-        this.lista = lista;
+        if (lista != null) {
+            this.lista = lista;
+        } else {
+            this.lista = new ArrayList<>();
+        }
     }
 
-    // Método para asignar el listener desde la Activity
     public void setOneditarListener(OnEditarListener listener) {
         this.editarListener = listener;
     }
 
+    // Cambiar tamaño de letra dinámicamente
+    public void setTamanodeLetra(float sizeSp) {
+        this.textSizeSp = sizeSp;
+        notifyDataSetChanged();
+    }
+
+    // Actualizar datos de la lista y refrescar RecyclerView
+    public void setDatos(List<Tarea> nuevaLista) {
+        if (nuevaLista != null) {
+            this.lista = nuevaLista;
+        } else {
+            this.lista = new ArrayList<>();
+        }
+        notifyDataSetChanged();
+    }
+
+    // ----------------------
+    // ViewHolder
+    // ----------------------
     public static class TareaViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitulo, tvDescripcion, tvProgreso, tvFechaObjetivo, tvPrioritaria, tvFechaInicio;
         ProgressBar progressBar;
@@ -64,19 +91,24 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         holder.tvProgreso.setText(t.getProgreso() + "%");
         holder.progressBar.setProgress(t.getProgreso());
 
-        if(t.getFechaObjetivo() != null) {
+        if (t.getFechaObjetivo() != null)
             holder.tvFechaObjetivo.setText("Objetivo: " + t.getFechaObjetivo().format(formatter));
-        }
-        if(t.getFechaCreacion() != null) {
+        if (t.getFechaCreacion() != null)
             holder.tvFechaInicio.setText("Creación: " + t.getFechaCreacion().format(formatter));
-        }
 
         holder.tvPrioritaria.setText(t.getPrioritaria() != null && t.getPrioritaria() ? "PRIORITARIA" : "Normal");
+
+        // Aplicar tamaño de letra dinámico
+        holder.tvTitulo.setTextSize(textSizeSp);
+        holder.tvDescripcion.setTextSize(textSizeSp);
+        holder.tvProgreso.setTextSize(textSizeSp);
+        holder.tvFechaObjetivo.setTextSize(textSizeSp);
+        holder.tvPrioritaria.setTextSize(textSizeSp);
+        holder.tvFechaInicio.setTextSize(textSizeSp);
 
         // Long click para menú contextual
         holder.itemView.setOnLongClickListener(v -> {
             if (editarListener != null) {
-                // CORRECCIÓN 2: Llamar al método correcto 'onEditar' en vez de 'onEdit'
                 editarListener.onEditar(t, position, v);
             }
             return true;
@@ -88,7 +120,9 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         return lista.size();
     }
 
-    // Interfaz para comunicar el click largo
+    // ----------------------
+    // Interfaz para click largo
+    // ----------------------
     public interface OnEditarListener {
         void onEditar(Tarea tarea, int position, View view);
     }

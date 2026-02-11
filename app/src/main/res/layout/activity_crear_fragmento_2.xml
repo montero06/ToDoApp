@@ -14,7 +14,7 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
-    <!-- EditText ocupa el espacio restante con layout_weight="1" -->
+    <!-- EditText para la descripción -->
     <EditText
         android:id="@+id/edtDescripcion"
         android:layout_width="match_parent"
@@ -30,8 +30,60 @@
         android:textColorHint="@color/texto_hint_legible"
         android:textSize="16sp" />
 
+    <!-- Contenedor horizontal para los botones de archivos -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp">
 
-    <!-- Contenedor horizontal para los botones -->
+        <ImageButton
+            android:id="@+id/btnAgregarDocumento"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/documento"
+            android:padding="8dp"
+            android:src="@drawable/document_search_24dp_e3e3e3_fill0_wght400_grad0_opsz24" />
+
+        <ImageButton
+            android:id="@+id/btnAgregarImagen"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/imagen"
+            android:padding="8dp"
+            android:src="@drawable/image_24dp_e3e3e3_fill0_wght400_grad0_opsz24" />
+
+        <ImageButton
+            android:id="@+id/btnAgregarAudio"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/audio"
+            android:padding="8dp"
+            android:src="@drawable/audio_file_24dp_e3e3e3_fill0_wght400_grad0_opsz24" />
+
+        <ImageButton
+            android:id="@+id/btnAgregarVideo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/video"
+            android:padding="8dp"
+            android:src="@drawable/video_camera_back_add_24dp_e3e3e3_fill0_wght400_grad0_opsz24" />
+    </LinearLayout>
+
+    <!-- Contenedor vertical para mostrar archivos adjuntos -->
+    <LinearLayout
+        android:id="@+id/contenedorArchivos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Contenedor horizontal para los botones Volver/Guardar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,6 +106,15 @@
             android:layout_marginStart="8dp"
             android:layout_weight="1"
             android:text="@string/btn_Guarfar" />
+
+        <!-- Botón Cancelar -->
+        <Button
+            android:id="@+id/btnCancelar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/btn_cancelar" />
     </LinearLayout>
 
 </LinearLayout>
