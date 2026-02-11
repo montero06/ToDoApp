@@ -2,6 +2,7 @@ package com.example.tarealarga1trimestre.Activity.CrearEditar;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.MimeTypeMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,14 +16,19 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.tarealarga1trimestre.Activity.CrearTareaAtivity;
 import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
+import com.example.tarealarga1trimestre.BuildConfig;
 import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -156,8 +162,15 @@ public class Fragmento2 extends Fragment {
     // Método para guardar archivo local
     // -------------------------
     private void guardarArchivoLocal(Uri uri, String tipo) {
-        String value = uri.toString();
         if (tipo == null) return;
+
+        String value;
+        if ("imagen".equalsIgnoreCase(tipo)) {
+            value = guardarImagenEnAlmacenInterno(uri);
+            if (value == null) return;
+        } else {
+            value = uri.toString();
+        }
 
         switch (tipo.toLowerCase(Locale.ROOT)) {
             case "documento":
@@ -175,6 +188,52 @@ public class Fragmento2 extends Fragment {
         }
 
         renderArchivosAdjuntos();
+    }
+
+    private String guardarImagenEnAlmacenInterno(Uri uri) {
+        String extension = obtenerExtension(uri);
+        String nombreArchivo = "img_" + System.currentTimeMillis() + extension;
+        File destino = new File(requireContext().getFilesDir(), nombreArchivo);
+
+        try (InputStream in = requireContext().getContentResolver().openInputStream(uri);
+             FileOutputStream out = new FileOutputStream(destino)) {
+
+            if (in == null) return null;
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+
+            Uri localUri = FileProvider.getUriForFile(
+                    requireContext(),
+                    BuildConfig.APPLICATION_ID + ".fileprovider",
+                    destino
+            );
+
+            return localUri.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String obtenerExtension(Uri uri) {
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        if (extension != null && !extension.trim().isEmpty()) {
+            return "." + extension;
+        }
+
+        String lastSegment = uri.getLastPathSegment();
+        if (lastSegment != null) {
+            int idx = lastSegment.lastIndexOf('.');
+            if (idx >= 0 && idx < lastSegment.length() - 1) {
+                return lastSegment.substring(idx);
+            }
+        }
+
+        return ".jpg";
     }
 
     private void renderArchivosAdjuntos() {
