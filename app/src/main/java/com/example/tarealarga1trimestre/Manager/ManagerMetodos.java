@@ -46,7 +46,11 @@ public class ManagerMetodos {
                     (i * 5) % 100,             // progreso
                     fechaCreacion,             // LocalDate
                     fechaObjetivo,             // LocalDate
-                    i % 2 == 0                 // prioritaria
+                    i % 2 == 0,                // prioritaria
+                    null,
+                    null,
+                    null,
+                    null
             ));
         }
 

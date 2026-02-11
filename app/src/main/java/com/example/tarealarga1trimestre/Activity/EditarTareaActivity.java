@@ -50,8 +50,11 @@ public class EditarTareaActivity extends AppCompatActivity {
                 tareaOriginal.getFechaCreacion().toString() : "");
         viewModel.setFechaObjetivo(tareaOriginal.getFechaObjetivo() != null ?
                 tareaOriginal.getFechaObjetivo().toString() : "");
-        viewModel.setPrioritaria(tareaOriginal.getPrioritaria() != null ?
-                tareaOriginal.getPrioritaria() : false);
+        viewModel.setPrioritaria(tareaOriginal.isPrioritaria());
+        viewModel.setUrlDoc(tareaOriginal.getUrlDoc());
+        viewModel.setUrlImg(tareaOriginal.getUrlImg());
+        viewModel.setUrlAud(tareaOriginal.getUrlAud());
+        viewModel.setUrlVid(tareaOriginal.getUrlVid());
     }
 
     public void guardarTareaEditada(Tarea modificada) {

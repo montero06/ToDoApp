@@ -23,6 +23,8 @@ import com.example.tarealarga1trimestre.Activity.CrearTareaAtivity;
 import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.R;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 
 public class Fragmento1 extends Fragment {
@@ -58,6 +60,16 @@ public class Fragmento1 extends Fragment {
         if (viewModel.getTitulo() != null) edtTitulo.setText(viewModel.getTitulo());
         if (viewModel.getFechaCreacion() != null) edtFechaCreacion.setText(viewModel.getFechaCreacion());
         if (viewModel.getFechaObjetivo() != null) edtFechaObjetivo.setText(viewModel.getFechaObjetivo());
+        if (viewModel.getFechaCreacion() == null || viewModel.getFechaCreacion().isEmpty()) {
+            String hoy = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            viewModel.setFechaCreacion(hoy);
+            edtFechaCreacion.setText(hoy);
+        }
+        if (viewModel.getFechaObjetivo() == null || viewModel.getFechaObjetivo().isEmpty()) {
+            String hoy = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            viewModel.setFechaObjetivo(hoy);
+            edtFechaObjetivo.setText(hoy);
+        }
         spinnerProgreso.setSelection(viewModel.getProgreso() / 10);
         cbPrioritaria.setChecked(viewModel.isPrioritaria());
 
