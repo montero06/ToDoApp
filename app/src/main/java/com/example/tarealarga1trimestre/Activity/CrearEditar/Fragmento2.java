@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.webkit.MimeTypeMap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -21,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 
 import com.example.tarealarga1trimestre.Activity.CrearTareaAtivity;
 import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
@@ -197,8 +200,9 @@ public class Fragmento2 extends Fragment {
     }
 
     private String copiarArchivoALocal(Uri uri, String tipo) {
-        File directorioAdjuntos = new File(requireContext().getFilesDir(), "adjuntos");
-        if (!directorioAdjuntos.exists() && !directorioAdjuntos.mkdirs()) {
+        File directorioAdjuntos = obtenerDirectorioAdjuntos();
+        if (directorioAdjuntos == null) {
+            Toast.makeText(requireContext(), R.string.error_storage_unavailable, Toast.LENGTH_SHORT).show();
             return null;
         }
 
@@ -220,6 +224,51 @@ public class Fragmento2 extends Fragment {
         } catch (Exception e) {
             return null;
         }
+    }
+
+
+    private File obtenerDirectorioAdjuntos() {
+        boolean guardarEnSd = PreferenceManager
+                .getDefaultSharedPreferences(requireContext())
+                .getBoolean("sd", false);
+
+        File baseDir;
+        if (guardarEnSd) {
+            baseDir = obtenerDirectorioSdExtraible();
+            if (baseDir == null) {
+                Toast.makeText(requireContext(), R.string.warning_sd_not_available_external_used, Toast.LENGTH_SHORT).show();
+                baseDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+            }
+        } else {
+            baseDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+        }
+
+        if (baseDir == null) {
+            return null;
+        }
+
+        File directorioAdjuntos = new File(baseDir, "adjuntos");
+        if (!directorioAdjuntos.exists() && !directorioAdjuntos.mkdirs()) {
+            return null;
+        }
+
+        return directorioAdjuntos;
+    }
+
+    private File obtenerDirectorioSdExtraible() {
+        File[] externalDirs = requireContext().getExternalFilesDirs(Environment.DIRECTORY_DOCUMENTS);
+        if (externalDirs == null || externalDirs.length == 0) {
+            return null;
+        }
+
+        for (File dir : externalDirs) {
+            if (dir == null) continue;
+            if (Environment.isExternalStorageRemovable(dir)) {
+                return dir;
+            }
+        }
+
+        return null;
     }
 
     private String obtenerExtension(Uri uri) {
