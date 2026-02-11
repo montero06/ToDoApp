@@ -87,4 +87,10 @@ Video: %4$s</string>
 
     <string name="warning_sd_not_available_external_used">No SD card detected. Saving to external storage instead.</string>
     <string name="error_storage_unavailable">No storage is available to save the file.</string>
+
+    <string name="prefs_category_remote_db">External database</string>
+    <string name="prefs_use_remote_db">Use external server</string>
+    <string name="prefs_use_remote_db_summary">Enable HTTP/HTTPS requests to load and save tasks from a remote API.</string>
+    <string name="prefs_remote_api_url">API base URL</string>
+    <string name="prefs_remote_api_url_summary">Example: http://10.0.2.2:8080/api</string>
 </resources>

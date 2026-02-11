@@ -7,6 +7,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 import androidx.preference.ListPreference;
 import androidx.preference.CheckBoxPreference;
+import androidx.preference.EditTextPreference;
 
 import com.example.tarealarga1trimestre.R;
 
@@ -60,6 +61,15 @@ public class AjustesFragmento extends PreferenceFragmentCompat {
         CheckBoxPreference sdPref = findPreference("sd");
         if (sdPref != null) {
             sdPref.setOnPreferenceChangeListener((preference, newValue) -> true);
+        }
+
+        EditTextPreference apiUrlPref = findPreference("url_api_externa");
+        if (apiUrlPref != null) {
+            apiUrlPref.setOnBindEditTextListener(editText -> editText.setSingleLine(true));
+            apiUrlPref.setOnPreferenceChangeListener((preference, newValue) -> {
+                String value = (String) newValue;
+                return value != null && !value.trim().isEmpty();
+            });
         }
     }
 }
