@@ -1,0 +1,46 @@
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="Visualización">
+
+        <SwitchPreferenceCompat
+            app:key="tema"
+            app:title="Tema"
+            app:defaultValue="true"/>
+
+        <ListPreference
+            app:key="fuente"
+            app:title="Tamaño de letra"
+            app:entries="@array/fuente_entries"
+            app:entryValues="@array/fuente_values"
+            app:defaultValue="2"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Ordenación">
+
+        <ListPreference
+            app:key="criterio"
+            app:title="Criterio"
+            app:entries="@array/criterio_entries"
+            app:entryValues="@array/criterio_values"
+            app:defaultValue="2"/>
+
+        <SwitchPreferenceCompat
+            app:key="orden"
+            app:title="Orden"
+            app:defaultValue="true"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Almacenamiento">
+
+        <CheckBoxPreference
+            app:key="sd"
+            app:title="Almacenamiento en tarjeta SD"
+            app:defaultValue="false"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

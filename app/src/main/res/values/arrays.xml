@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Tamaño de letra -->
+    <string-array name="fuente_entries">
+        <item>Pequeña</item>
+        <item>Mediana</item>
+        <item>Grande</item>
+    </string-array>
+
+    <string-array name="fuente_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <!-- Criterio de ordenación -->
+    <string-array name="criterio_entries">
+        <item>Alfabético</item>
+        <item>Fecha de creación</item>
+        <item>Días restantes</item>
+        <item>Progreso</item>
+    </string-array>
+
+    <string-array name="criterio_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+</resources>

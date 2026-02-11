@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tamanno_pequeño">14sp</dimen>
+    <dimen name="tamanno_mediano">18sp</dimen>
+    <dimen name="Tamanno_grande">22sp</dimen>
+</resources>
