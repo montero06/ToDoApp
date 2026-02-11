@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,6 +34,7 @@ public class Fragmento2 extends Fragment {
     private EditText edtDescripcion;
     private Button btnVolver, btnGuardar;
     private ImageButton btnAgregarDocumento, btnAgregarImagen, btnAgregarAudio, btnAgregarVideo;
+    private LinearLayout contenedorArchivos;
 
     private ActivityResultLauncher<String[]> archivoLauncher;
     private String tipoArchivoSeleccionado;
@@ -53,6 +56,7 @@ public class Fragmento2 extends Fragment {
         btnAgregarImagen = root.findViewById(R.id.btnAgregarImagen);
         btnAgregarAudio = root.findViewById(R.id.btnAgregarAudio);
         btnAgregarVideo = root.findViewById(R.id.btnAgregarVideo);
+        contenedorArchivos = root.findViewById(R.id.contenedorArchivos);
 
         // Cargar descripción si ya existe en ViewModel
         if (viewModel.getDescripcion() != null) {
@@ -143,6 +147,8 @@ public class Fragmento2 extends Fragment {
             archivoLauncher.launch(new String[]{"video/*"});
         });
 
+        renderArchivosAdjuntos();
+
         return root;
     }
 
@@ -150,7 +156,7 @@ public class Fragmento2 extends Fragment {
     // Método para guardar archivo local
     // -------------------------
     private void guardarArchivoLocal(Uri uri, String tipo) {
-                String value = uri.toString();
+        String value = uri.toString();
         if (tipo == null) return;
 
         switch (tipo.toLowerCase(Locale.ROOT)) {
@@ -167,5 +173,28 @@ public class Fragmento2 extends Fragment {
                 viewModel.setUrlVid(value);
                 break;
         }
+
+        renderArchivosAdjuntos();
+    }
+
+    private void renderArchivosAdjuntos() {
+        if (contenedorArchivos == null) return;
+
+        contenedorArchivos.removeAllViews();
+
+        addArchivoItem(getString(R.string.documento), viewModel.getUrlDoc());
+        addArchivoItem(getString(R.string.imagen), viewModel.getUrlImg());
+        addArchivoItem(getString(R.string.audio), viewModel.getUrlAud());
+        addArchivoItem(getString(R.string.video), viewModel.getUrlVid());
+    }
+
+    private void addArchivoItem(String tipo, String uri) {
+        if (uri == null || uri.trim().isEmpty()) return;
+
+        TextView archivoView = new TextView(requireContext());
+        archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, uri));
+        archivoView.setTextSize(14f);
+        archivoView.setPadding(0, 4, 0, 4);
+        contenedorArchivos.addView(archivoView);
     }
 }

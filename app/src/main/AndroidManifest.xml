@@ -20,6 +20,7 @@
         <activity  android:name=".Activity.Preferencias.PreferenciasActivity" />
         <activity android:name=".Activity.Listado.ListadoTareasActivity" />
         <activity android:name=".Activity.EditarTareaActivity" />
+        <activity android:name=".Activity.DetalleTareaActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
