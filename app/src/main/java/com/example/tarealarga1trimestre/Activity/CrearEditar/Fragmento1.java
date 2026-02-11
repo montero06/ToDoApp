@@ -2,6 +2,8 @@ package com.example.tarealarga1trimestre.Activity.CrearEditar;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +20,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.tarealarga1trimestre.Activity.CrearTareaAtivity;
+import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.R;
 
 import java.util.Calendar;
@@ -61,7 +65,14 @@ public class Fragmento1 extends Fragment {
         edtFechaCreacion.setOnClickListener(v -> mostrarDatePicker(edtFechaCreacion));
         edtFechaObjetivo.setOnClickListener(v -> mostrarDatePicker(edtFechaObjetivo));
 
-        // Botón siguiente
+        // Mantener ViewModel sincronizado incluso sin pulsar botón
+        sincronizarCamposConViewModel();
+
+        // Botón siguiente / actualizar
+        if (requireActivity() instanceof EditarTareaActivity) {
+            btnSiguiente.setText(R.string.btn_actualizar_datos);
+        }
+
         btnSiguiente.setOnClickListener(v -> {
             viewModel.setTitulo(edtTitulo.getText().toString());
             viewModel.setFechaCreacion(edtFechaCreacion.getText().toString());
@@ -69,13 +80,67 @@ public class Fragmento1 extends Fragment {
             viewModel.setProgreso(spinnerProgreso.getSelectedItemPosition() * 10);
             viewModel.setPrioritaria(cbPrioritaria.isChecked());
 
-            // Si es edición, no hay pasos
             if (requireActivity() instanceof CrearTareaAtivity) {
                 ((CrearTareaAtivity) requireActivity()).cargarPaso2();
+            } else {
+                Toast.makeText(requireContext(), R.string.datos_actualizados, Toast.LENGTH_SHORT).show();
             }
         });
 
         return root;
+    }
+
+    private void sincronizarCamposConViewModel() {
+        edtTitulo.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setTitulo(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        edtFechaCreacion.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setFechaCreacion(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        edtFechaObjetivo.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                viewModel.setFechaObjetivo(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        spinnerProgreso.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                viewModel.setProgreso(position * 10);
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) { }
+        });
+
+        cbPrioritaria.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setPrioritaria(isChecked));
     }
 
     private void mostrarDatePicker(EditText editText) {

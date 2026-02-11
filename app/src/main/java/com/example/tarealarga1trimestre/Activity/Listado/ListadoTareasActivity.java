@@ -49,6 +49,8 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
     private int posicionContextual = -1;
 
+    private final TareaAdapter.OnItemClickListener listenerDetalle = tarea -> mostrarDetallesFragmento2(tarea);
+
     private final TareaAdapter.OnEditarListener listenerEditar = (tarea, position, view) -> {
         posicionContextual = position;
         registerForContextMenu(view);
@@ -75,6 +77,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
         adapter = new TareaAdapter(new ArrayList<>());
         adapter.setOneditarListener(listenerEditar);
+        adapter.setOnItemClickListener(listenerDetalle);
         recycler.setAdapter(adapter);
 
         actualizarListaVisualizada();
@@ -222,6 +225,19 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
     private float pxToSp(float px) {
         return px / getResources().getDisplayMetrics().scaledDensity;
+    }
+
+    private void mostrarDetallesFragmento2(Tarea tarea) {
+        String descripcion = tarea.getDescripcion();
+        if (descripcion == null || descripcion.trim().isEmpty()) {
+            descripcion = getString(R.string.sinDescripcion);
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.detallesFragmento2Titulo, tarea.getTitulo()))
+                .setMessage(descripcion)
+                .setPositiveButton(R.string.ok, null)
+                .show();
     }
 
     // ----------------------

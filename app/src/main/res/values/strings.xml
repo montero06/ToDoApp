@@ -31,4 +31,8 @@
     <string name="audio">audio</string>
     <string name="imagen">imagen</string>
     <string name="documento">documento</string>
+    <string name="sinDescripcion">Sin descripción disponible</string>
+    <string name="detallesFragmento2Titulo">Detalles (fragmento 2): %1$s</string>
+    <string name="btn_actualizar_datos">Actualizar datos</string>
+    <string name="datos_actualizados">Datos del fragmento 1 actualizados</string>
 </resources>
