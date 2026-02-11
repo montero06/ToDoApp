@@ -35,4 +35,19 @@
     <string name="detallesFragmento2Titulo">Detalles (fragmento 2): %1$s</string>
     <string name="btn_actualizar_datos">Actualizar datos</string>
     <string name="datos_actualizados">Datos del fragmento 1 actualizados</string>
+    <string name="sin_titulo">Sin título</string>
+    <string name="sin_fecha">Sin fecha</string>
+    <string name="prioridad_alta">Prioritaria</string>
+    <string name="prioridad_normal">Normal</string>
+    <string name="archivos_no_implementados">Adjuntos: pendiente de implementación (documento/imagen/audio/video).</string>
+    <string name="detalles_tarea_completa">Título: %1$s
+Fecha creación: %2$s
+Fecha objetivo: %3$s
+Progreso: %4$d%%
+Prioridad: %5$s
+
+Descripción:
+%6$s
+
+%7$s</string>
 </resources>
