@@ -30,8 +30,8 @@ import com.example.tarealarga1trimestre.Manager.TareaAdapter;
 import com.example.tarealarga1trimestre.Manager.utilLetra;
 import com.example.tarealarga1trimestre.R;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class ListadoTareasActivity extends AppCompatActivity {
 
@@ -50,6 +50,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
     private int posicionContextual = -1;
 
     private final TareaAdapter.OnItemClickListener listenerDetalle = tarea -> mostrarDetallesFragmento2(tarea);
+    private final DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final TareaAdapter.OnEditarListener listenerEditar = (tarea, position, view) -> {
         posicionContextual = position;
@@ -171,9 +172,8 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String criterio = prefs.getString("Criterio", "2");
-
-        boolean ascendente = prefs.getBoolean("Orden", true); // true = ascendente, false = descendente
+        String criterio = prefs.getString("criterio", "2");
+        boolean ascendente = prefs.getBoolean("orden", true); // true = ascendente, false = descendente
 
 
         lista.sort((t1, t2) -> {
@@ -194,7 +194,6 @@ public class ListadoTareasActivity extends AppCompatActivity {
         });
 
 
-        if (!ascendente) Collections.reverse(lista);
     }
 
     // ----------------------
@@ -228,14 +227,40 @@ public class ListadoTareasActivity extends AppCompatActivity {
     }
 
     private void mostrarDetallesFragmento2(Tarea tarea) {
-        String descripcion = tarea.getDescripcion();
-        if (descripcion == null || descripcion.trim().isEmpty()) {
-            descripcion = getString(R.string.sinDescripcion);
-        }
+        String titulo = (tarea.getTitulo() == null || tarea.getTitulo().trim().isEmpty())
+                ? getString(R.string.sin_titulo)
+                : tarea.getTitulo();
+
+        String descripcion = (tarea.getDescripcion() == null || tarea.getDescripcion().trim().isEmpty())
+                ? getString(R.string.sinDescripcion)
+                : tarea.getDescripcion();
+
+        String fechaCreacion = tarea.getFechaCreacion() != null
+                ? tarea.getFechaCreacion().format(formatterFecha)
+                : getString(R.string.sin_fecha);
+
+        String fechaObjetivo = tarea.getFechaObjetivo() != null
+                ? tarea.getFechaObjetivo().format(formatterFecha)
+                : getString(R.string.sin_fecha);
+
+        String prioridad = tarea.getPrioritaria() != null && tarea.getPrioritaria()
+                ? getString(R.string.prioridad_alta)
+                : getString(R.string.prioridad_normal);
+
+        String detalles = getString(
+                R.string.detalles_tarea_completa,
+                titulo,
+                fechaCreacion,
+                fechaObjetivo,
+                tarea.getProgreso(),
+                prioridad,
+                descripcion,
+                getString(R.string.archivos_no_implementados)
+        );
 
         new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.detallesFragmento2Titulo, tarea.getTitulo()))
-                .setMessage(descripcion)
+                .setTitle(getString(R.string.detallesFragmento2Titulo, titulo))
+                .setMessage(detalles)
                 .setPositiveButton(R.string.ok, null)
                 .show();
     }
