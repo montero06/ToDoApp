@@ -3,6 +3,7 @@ package com.example.tarealarga1trimestre.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -62,12 +63,21 @@ public class DetalleTareaActivity extends AppCompatActivity {
 
     private void abrirAdjunto(String uri) {
         try {
+            Uri parsedUri = Uri.parse(uri);
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(uri));
+            intent.setDataAndType(parsedUri, obtenerMimeType(uri));
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
         } catch (Exception ignored) {
         }
+    }
+
+    private String obtenerMimeType(String uri) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri);
+        if (extension == null || extension.trim().isEmpty()) return "*/*";
+
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
+        return mimeType != null ? mimeType : "*/*";
     }
 
     private String obtenerNombreArchivo(String uri) {
