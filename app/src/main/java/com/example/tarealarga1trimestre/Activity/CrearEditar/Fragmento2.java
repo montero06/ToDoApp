@@ -2,6 +2,7 @@ package com.example.tarealarga1trimestre.Activity.CrearEditar;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.webkit.MimeTypeMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,9 @@ import com.example.tarealarga1trimestre.R;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Locale;
 
 public class Fragmento2 extends Fragment {
@@ -156,8 +160,10 @@ public class Fragmento2 extends Fragment {
     // Método para guardar archivo local
     // -------------------------
     private void guardarArchivoLocal(Uri uri, String tipo) {
-        String value = uri.toString();
         if (tipo == null) return;
+
+        String value = copiarArchivoALocal(uri, tipo);
+        if (value == null) return;
 
         switch (tipo.toLowerCase(Locale.ROOT)) {
             case "documento":
@@ -175,6 +181,38 @@ public class Fragmento2 extends Fragment {
         }
 
         renderArchivosAdjuntos();
+    }
+
+    private String copiarArchivoALocal(Uri uri, String tipo) {
+        File directorioAdjuntos = new File(requireContext().getFilesDir(), "adjuntos");
+        if (!directorioAdjuntos.exists() && !directorioAdjuntos.mkdirs()) {
+            return null;
+        }
+
+        String extension = obtenerExtension(uri);
+        String nombreArchivo = tipo.toLowerCase(Locale.ROOT) + "_" + System.currentTimeMillis() + extension;
+        File destino = new File(directorioAdjuntos, nombreArchivo);
+
+        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+             FileOutputStream outputStream = new FileOutputStream(destino)) {
+            if (inputStream == null) return null;
+
+            byte[] buffer = new byte[8192];
+            int bytesLeidos;
+            while ((bytesLeidos = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesLeidos);
+            }
+
+            return Uri.fromFile(destino).toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String obtenerExtension(Uri uri) {
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        return (extension == null || extension.trim().isEmpty()) ? "" : "." + extension;
     }
 
     private void renderArchivosAdjuntos() {
