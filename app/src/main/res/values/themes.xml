@@ -14,4 +14,16 @@
 <style name="Theme.TareaLarga1trimestre"
     parent="Base.Theme.TareaLarga1trimestre" />
 
+<style name="ThemeOverlay.TareaLarga1trimestre.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+    <item name="colorControlNormal">@color/toolbar_content</item>
+    <item name="android:textColorPrimary">@color/toolbar_content</item>
+    <item name="android:textColorSecondary">@color/toolbar_content</item>
+</style>
+
+<style name="ThemeOverlay.TareaLarga1trimestre.PopupMenu" parent="ThemeOverlay.AppCompat.Light">
+    <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+    <item name="android:textColorPrimary">@color/menu_popup_text</item>
+    <item name="android:textColorSecondary">@color/menu_popup_text</item>
+</style>
+
 </resources>

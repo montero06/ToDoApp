@@ -14,5 +14,21 @@
         <color name="texto_input_legible">#FFFFFF</color>
         <color name="texto_hint_legible">#B3FFFFFF</color>
 
+    <!-- Listado y tarjetas (modo oscuro) -->
+    <color name="list_screen_background">#0F1117</color>
+    <color name="task_card_background">#1A1F2B</color>
+    <color name="task_title_color">#F1F5F9</color>
+    <color name="task_secondary_text_color">#B8C2D3</color>
+    <color name="task_description_color">#D9E0EC</color>
+    <color name="task_priority_color">#FFB4AB</color>
+    <color name="empty_state_color">#9CA3AF</color>
+
+    <!-- Menú de 3 puntos (modo oscuro) -->
+    <color name="toolbar_background">#1F2A44</color>
+    <color name="toolbar_content">#E6ECFF</color>
+    <color name="menu_popup_background">#202939</color>
+    <color name="menu_popup_text">#F8FAFC</color>
+    <color name="menu_popup_divider">#334155</color>
+
 
 </resources>
