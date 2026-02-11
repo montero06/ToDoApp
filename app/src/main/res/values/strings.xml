@@ -1,36 +1,38 @@
 <resources>
-    <string name="app_name">TareaLarga1trimestre</string>
+    <string name="app_name">Tareas</string>
     <string name="bttn_MainEmpezar">¡Empezar!</string>
-    <string name="Acerca_de">Acerca de...</string>
+    <string name="Acerca_de">Acerca de…</string>
     <string name="salir">Salir</string>
-    <string name="ok">ok</string>
+    <string name="ok">OK</string>
     <string name="menuContextual">Editar</string>
     <string name="cm_eliminar">Eliminar</string>
+
     <string name="tituloFragmento1">Título de la tarea</string>
     <string name="fechaCreacionfratg1">Fecha de creación</string>
-    <string name="fechaObjfrag1">Fecha Obj</string>
+    <string name="fechaObjfrag1">Fecha objetivo</string>
     <string name="Prioritaria">Prioritaria</string>
-    <string name="btn_siguiente">siguiente</string>
-    <string name="DescripcionCompleta">Descripción Completa\n</string>
-    <string name="escribeDescribcion">Escribe Descripción</string>
+    <string name="btn_siguiente">Siguiente</string>
+    <string name="DescripcionCompleta">Descripción completa</string>
+    <string name="escribeDescribcion">Escribe una descripción</string>
     <string name="btn_volver">Volver</string>
     <string name="btn_Guarfar">Guardar</string>
     <string name="editarTarea">Editar tarea</string>
-    <string name="crearTarea">Crear Tarea</string>
-    <string name="titulo">Titulo</string>
-    <string name="Descripcion">Descripcion</string>
+    <string name="crearTarea">Crear tarea</string>
+    <string name="titulo">Título</string>
+    <string name="Descripcion">Descripción</string>
     <string name="FerchaObj">Fecha objetivo: 10/01/2025</string>
-    <string name="Prioritarias">prioritaria</string>
+    <string name="Prioritarias">Prioritaria</string>
     <string name="añadirTarea">Añadir tarea</string>
-    <string name="btn_translate">traducir</string>
+    <string name="btn_translate">Traducir</string>
     <string name="btn_mode">Cambiar tema</string>
-    <string name="progreso">progreso</string>
+    <string name="progreso">Progreso</string>
     <string name="preferencias">Preferencias</string>
-    <string name="btn_cancelar">Cancelar\n</string>
-    <string name="video">Video</string>
-    <string name="audio">audio</string>
-    <string name="imagen">imagen</string>
-    <string name="documento">documento</string>
+    <string name="btn_cancelar">Cancelar</string>
+
+    <string name="video">Vídeo</string>
+    <string name="audio">Audio</string>
+    <string name="imagen">Imagen</string>
+    <string name="documento">Documento</string>
     <string name="sinDescripcion">Sin descripción disponible</string>
     <string name="detallesFragmento2Titulo">Detalles (fragmento 2): %1$s</string>
     <string name="btn_actualizar_datos">Actualizar datos</string>
@@ -39,7 +41,8 @@
     <string name="sin_fecha">Sin fecha</string>
     <string name="prioridad_alta">Prioritaria</string>
     <string name="prioridad_normal">Normal</string>
-    <string name="archivos_no_implementados">Adjuntos: pendiente de implementación (documento/imagen/audio/video).</string>
+    <string name="archivos_no_implementados">Adjuntos: pendiente de implementación (documento/imagen/audio/vídeo).</string>
+
     <string name="detalles_tarea_completa">Título: %1$s
 Fecha creación: %2$s
 Fecha objetivo: %3$s
@@ -57,17 +60,31 @@ No iniciadas: %3$d
 En progreso: %4$d
 Completadas: %5$d
 Progreso promedio: %6$.1f%%
-Días promedio hasta fecha objetivo: %7$.1f</string>
+Días promedio hasta la fecha objetivo: %7$.1f</string>
     <string name="adjuntos_detalle">Documento: %1$s
 Imagen: %2$s
 Audio: %3$s
-Video: %4$s</string>
+Vídeo: %4$s</string>
     <string name="no_disponible">No disponible</string>
     <string name="archivo_adjunto_item">%1$s: %2$s</string>
-    <string name="archivo_no_adjunto">%1$s: No adjunto</string>
+    <string name="archivo_no_adjunto">%1$s: Sin adjuntar</string>
     <string name="detalle_tarea_titulo">Detalle de la tarea</string>
     <string name="adjuntos_label">Adjuntos</string>
     <string name="progreso_detalle">%1$d%%</string>
     <string name="no_hay_app_para_abrir_archivo">No hay ninguna aplicación compatible para abrir este archivo.</string>
     <string name="error_abrir_archivo">No se pudo abrir el archivo seleccionado.</string>
+
+    <string name="prefs_category_display">Visualización</string>
+    <string name="prefs_theme">Tema</string>
+    <string name="prefs_font_size">Tamaño de letra</string>
+    <string name="prefs_category_sorting">Ordenación</string>
+    <string name="prefs_sort_criteria">Criterio</string>
+    <string name="prefs_sort_order">Orden ascendente</string>
+    <string name="prefs_category_storage">Almacenamiento</string>
+    <string name="prefs_save_in_sd">Guardar en tarjeta SD (si está disponible)</string>
+    <string name="prefs_save_in_sd_summary_on">Los adjuntos se guardarán en la tarjeta SD extraíble.</string>
+    <string name="prefs_save_in_sd_summary_off">Los adjuntos se guardarán en el almacenamiento externo principal.</string>
+
+    <string name="warning_sd_not_available_external_used">No se detectó tarjeta SD. Se guardará en almacenamiento externo.</string>
+    <string name="error_storage_unavailable">No hay almacenamiento disponible para guardar el archivo.</string>
 </resources>

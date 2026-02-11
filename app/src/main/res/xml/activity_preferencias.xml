@@ -3,43 +3,45 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory
-        android:title="Visualización">
+        android:title="@string/prefs_category_display">
 
         <SwitchPreferenceCompat
             app:key="tema"
-            app:title="Tema"
+            app:title="@string/prefs_theme"
             app:defaultValue="true"/>
 
         <ListPreference
             app:key="fuente"
-            app:title="Tamaño de letra"
+            app:title="@string/prefs_font_size"
             app:entries="@array/fuente_entries"
             app:entryValues="@array/fuente_values"
             app:defaultValue="2"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Ordenación">
+        android:title="@string/prefs_category_sorting">
 
         <ListPreference
             app:key="criterio"
-            app:title="Criterio"
+            app:title="@string/prefs_sort_criteria"
             app:entries="@array/criterio_entries"
             app:entryValues="@array/criterio_values"
             app:defaultValue="2"/>
 
         <SwitchPreferenceCompat
             app:key="orden"
-            app:title="Orden"
+            app:title="@string/prefs_sort_order"
             app:defaultValue="true"/>
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Almacenamiento">
+        android:title="@string/prefs_category_storage">
 
         <CheckBoxPreference
             app:key="sd"
-            app:title="Almacenamiento en tarjeta SD"
+            app:title="@string/prefs_save_in_sd"
+            app:summaryOn="@string/prefs_save_in_sd_summary_on"
+            app:summaryOff="@string/prefs_save_in_sd_summary_off"
             app:defaultValue="false"/>
     </PreferenceCategory>
 

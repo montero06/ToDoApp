@@ -1,35 +1,58 @@
+<resources>
+    <string name="app_name">Tasks</string>
+    <string name="bttn_MainEmpezar">Start!</string>
+    <string name="Acerca_de">About…</string>
+    <string name="salir">Exit</string>
+    <string name="ok">OK</string>
+    <string name="menuContextual">Edit</string>
+    <string name="cm_eliminar">Delete</string>
 
+    <string name="tituloFragmento1">Task title</string>
+    <string name="fechaCreacionfratg1">Creation date</string>
+    <string name="fechaObjfrag1">Target date</string>
+    <string name="Prioritaria">Priority</string>
+    <string name="btn_siguiente">Next</string>
+    <string name="DescripcionCompleta">Full description</string>
+    <string name="escribeDescribcion">Enter a description</string>
+    <string name="btn_volver">Back</string>
+    <string name="btn_Guarfar">Save</string>
+    <string name="editarTarea">Edit task</string>
+    <string name="crearTarea">Create task</string>
+    <string name="titulo">Title</string>
+    <string name="Descripcion">Description</string>
+    <string name="FerchaObj">Target date: 01/10/2025</string>
+    <string name="Prioritarias">Priority</string>
+    <string name="añadirTarea">Add task</string>
+    <string name="btn_translate">Translate</string>
+    <string name="btn_mode">Switch theme</string>
+    <string name="progreso">Progress</string>
+    <string name="preferencias">Preferences</string>
+    <string name="btn_cancelar">Cancel</string>
 
-    <resources>
-        <string name="app_name">LongTask1Trimester</string>
-        <string name="bttn_MainEmpezar">Start!</string>
-        <string name="Acerca_de">About...</string>
-        <string name="salir">Exit</string>
-        <string name="ok">OK</string>
-        <string name="menuContextual">Edit</string>
-        <string name="cm_eliminar">Delete</string>
-        <string name="tituloFragmento1">Task Title</string>
-        <string name="fechaCreacionfratg1">Creation Date</string>
-        <string name="fechaObjfrag1">Target Date</string>
-        <string name="Prioritaria">Priority</string>
-        <string name="btn_siguiente">Next</string>
-        <string name="DescripcionCompleta">Full Description\n</string>
-        <string name="escribeDescribcion">Enter Description</string>
-        <string name="btn_volver">Back</string>
-        <string name="btn_Guarfar">Save</string>
-        <string name="editarTarea">Edit Task</string>
-        <string name="crearTarea">Create Task</string>
-        <string name="titulo">Title</string>
-        <string name="Descripcion">Description</string>
-        <string name="FerchaObj">Target Date: 01/10/2025</string>
-        <string name="Prioritarias">Priority</string>
-        <string name="añadirTarea">Add Task</string>
-        <string name="btn_translate">translate</string>
-        <string name="btn_mode">switch theme</string>
-        <string name="sinDescripcion">No description available</string>
+    <string name="video">Video</string>
+    <string name="audio">Audio</string>
+    <string name="imagen">Image</string>
+    <string name="documento">Document</string>
+    <string name="sinDescripcion">No description available</string>
     <string name="detallesFragmento2Titulo">Details (fragment 2): %1$s</string>
     <string name="btn_actualizar_datos">Update data</string>
     <string name="datos_actualizados">Fragment 1 data updated</string>
+    <string name="sin_titulo">Untitled</string>
+    <string name="sin_fecha">No date</string>
+    <string name="prioridad_alta">High priority</string>
+    <string name="prioridad_normal">Normal</string>
+    <string name="archivos_no_implementados">Attachments: pending implementation (document/image/audio/video).</string>
+
+    <string name="detalles_tarea_completa">Title: %1$s
+Creation date: %2$s
+Target date: %3$s
+Progress: %4$d%%
+Priority: %5$s
+
+Description:
+%6$s
+
+%7$s</string>
     <string name="estadisticas">Statistics</string>
     <string name="estadisticas_detalle">Total tasks: %1$d
 Priority tasks: %2$d
@@ -37,15 +60,31 @@ Not started: %3$d
 In progress: %4$d
 Completed: %5$d
 Average progress: %6$.1f%%
-Average days to target date: %7$.1f</string>
+Average days until target date: %7$.1f</string>
     <string name="adjuntos_detalle">Document: %1$s
 Image: %2$s
 Audio: %3$s
 Video: %4$s</string>
     <string name="no_disponible">Not available</string>
+    <string name="archivo_adjunto_item">%1$s: %2$s</string>
+    <string name="archivo_no_adjunto">%1$s: Not attached</string>
+    <string name="detalle_tarea_titulo">Task details</string>
+    <string name="adjuntos_label">Attachments</string>
+    <string name="progreso_detalle">%1$d%%</string>
+    <string name="no_hay_app_para_abrir_archivo">There is no compatible app to open this file.</string>
+    <string name="error_abrir_archivo">The selected file could not be opened.</string>
 
-    <string name="no_hay_app_para_adjunto">No app is available to open this attachment.</string>
-    <string name="error_abrir_adjunto">Could not open the attachment.</string>
+    <string name="prefs_category_display">Display</string>
+    <string name="prefs_theme">Theme</string>
+    <string name="prefs_font_size">Font size</string>
+    <string name="prefs_category_sorting">Sorting</string>
+    <string name="prefs_sort_criteria">Criteria</string>
+    <string name="prefs_sort_order">Ascending order</string>
+    <string name="prefs_category_storage">Storage</string>
+    <string name="prefs_save_in_sd">Save to SD card (if available)</string>
+    <string name="prefs_save_in_sd_summary_on">Attachments will be saved to the removable SD card.</string>
+    <string name="prefs_save_in_sd_summary_off">Attachments will be saved to primary external storage.</string>
+
+    <string name="warning_sd_not_available_external_used">No SD card detected. Saving to external storage instead.</string>
+    <string name="error_storage_unavailable">No storage is available to save the file.</string>
 </resources>
-
-
