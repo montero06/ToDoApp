@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.tarealarga1trimestre.Activity.CrearTareaAtivity;
+import com.example.tarealarga1trimestre.Activity.DetalleTareaActivity;
 import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.Activity.Preferencias.PreferenciasActivity;
 import com.example.tarealarga1trimestre.Data.TaskStats;
@@ -31,7 +32,8 @@ import com.example.tarealarga1trimestre.Manager.TareaAdapter;
 import com.example.tarealarga1trimestre.Manager.utilLetra;
 import com.example.tarealarga1trimestre.R;
 
-import java.time.format.DateTimeFormatter;
+import java.text.Collator;
+import java.util.Locale;
 import java.util.ArrayList;
 
 public class ListadoTareasActivity extends AppCompatActivity {
@@ -51,8 +53,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
     private int posicionContextual = -1;
 
-    private final TareaAdapter.OnItemClickListener listenerDetalle = this::mostrarDetallesFragmento2;
-    private final DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final TareaAdapter.OnItemClickListener listenerDetalle = this::abrirDetalleTarea;
 
     private final TareaAdapter.OnEditarListener listenerEditar = (tarea, position, view) -> {
         posicionContextual = position;
@@ -166,11 +167,16 @@ public class ListadoTareasActivity extends AppCompatActivity {
         String criterio = prefs.getString("criterio", "2");
         boolean ascendente = prefs.getBoolean("orden", true);
 
+        Collator collator = Collator.getInstance(new Locale("es", "ES"));
+        collator.setStrength(Collator.PRIMARY);
+
         lista.sort((t1, t2) -> {
-            int cmp = 0;
+            int cmp;
             switch (criterio) {
                 case "1":
-                    cmp = t1.getTitulo().compareToIgnoreCase(t2.getTitulo());
+                    String titulo1 = normalizarTitulo(t1.getTitulo());
+                    String titulo2 = normalizarTitulo(t2.getTitulo());
+                    cmp = collator.compare(titulo1, titulo2);
                     break;
                 case "2":
                     cmp = t1.getFechaCreacion().compareTo(t2.getFechaCreacion());
@@ -181,6 +187,11 @@ public class ListadoTareasActivity extends AppCompatActivity {
                 case "4":
                     cmp = Integer.compare(t1.getProgreso(), t2.getProgreso());
                     break;
+                default:
+                    cmp = 0;
+            }
+            if (cmp == 0) {
+                cmp = Long.compare(t1.getId(), t2.getId());
             }
             return ascendente ? cmp : -cmp;
         });
@@ -202,49 +213,15 @@ public class ListadoTareasActivity extends AppCompatActivity {
         return px / getResources().getDisplayMetrics().scaledDensity;
     }
 
-    private void mostrarDetallesFragmento2(Tarea tarea) {
-        String titulo = (tarea.getTitulo().trim().isEmpty())
-                ? getString(R.string.sin_titulo)
-                : tarea.getTitulo();
-
-        String descripcion = (tarea.getDescripcion() == null || tarea.getDescripcion().trim().isEmpty())
-                ? getString(R.string.sinDescripcion)
-                : tarea.getDescripcion();
-
-        String fechaCreacion = tarea.getFechaCreacion().format(formatterFecha);
-
-        String fechaObjetivo = tarea.getFechaObjetivo().format(formatterFecha);
-
-        String prioridad = tarea.isPrioritaria()
-                ? getString(R.string.prioridad_alta)
-                : getString(R.string.prioridad_normal);
-
-        String adjuntos = getString(R.string.adjuntos_detalle,
-                valorArchivo(tarea.getUrlDoc()),
-                valorArchivo(tarea.getUrlImg()),
-                valorArchivo(tarea.getUrlAud()),
-                valorArchivo(tarea.getUrlVid()));
-
-        String detalles = getString(
-                R.string.detalles_tarea_completa,
-                titulo,
-                fechaCreacion,
-                fechaObjetivo,
-                tarea.getProgreso(),
-                prioridad,
-                descripcion,
-                adjuntos
-        );
-
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.detallesFragmento2Titulo, titulo))
-                .setMessage(detalles)
-                .setPositiveButton(R.string.ok, null)
-                .show();
+    private void abrirDetalleTarea(Tarea tarea) {
+        Intent intent = new Intent(this, DetalleTareaActivity.class);
+        intent.putExtra("TAREA_DETALLE", tarea);
+        startActivity(intent);
     }
 
-    private String valorArchivo(String value) {
-        return value == null || value.trim().isEmpty() ? getString(R.string.no_disponible) : value;
+    private String normalizarTitulo(String titulo) {
+        if (titulo == null) return "";
+        return titulo.trim();
     }
 
     @Override

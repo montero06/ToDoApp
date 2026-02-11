@@ -63,4 +63,9 @@ Imagen: %2$s
 Audio: %3$s
 Video: %4$s</string>
     <string name="no_disponible">No disponible</string>
+    <string name="archivo_adjunto_item">%1$s: %2$s</string>
+    <string name="archivo_no_adjunto">%1$s: No adjunto</string>
+    <string name="detalle_tarea_titulo">Detalle de la tarea</string>
+    <string name="adjuntos_label">Adjuntos</string>
+    <string name="progreso_detalle">%1$d%%</string>
 </resources>
