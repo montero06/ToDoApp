@@ -1,12 +1,9 @@
 package com.example.tarealarga1trimestre.Activity;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -65,44 +62,16 @@ public class DetalleTareaActivity extends AppCompatActivity {
 
     private void abrirAdjunto(String uri) {
         try {
-            Uri parsedUri = Uri.parse(uri);
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            String mimeType = getContentResolver().getType(parsedUri);
-            if (mimeType != null && !mimeType.trim().isEmpty()) {
-                intent.setDataAndType(parsedUri, mimeType);
-            } else {
-                intent.setData(parsedUri);
-            }
+            intent.setData(Uri.parse(uri));
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            PackageManager packageManager = getPackageManager();
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent);
-            } else {
-                Toast.makeText(this, R.string.no_hay_app_para_adjunto, Toast.LENGTH_SHORT).show();
-            }
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.error_abrir_adjunto, Toast.LENGTH_SHORT).show();
+            startActivity(intent);
+        } catch (Exception ignored) {
         }
     }
 
     private String obtenerNombreArchivo(String uri) {
         Uri parsed = Uri.parse(uri);
-
-        try (android.database.Cursor cursor = getContentResolver()
-                .query(parsed, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                if (index >= 0) {
-                    String displayName = cursor.getString(index);
-                    if (displayName != null && !displayName.trim().isEmpty()) {
-                        return displayName;
-                    }
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
         String lastSegment = parsed.getLastPathSegment();
         if (lastSegment == null || lastSegment.trim().isEmpty()) return uri;
 
