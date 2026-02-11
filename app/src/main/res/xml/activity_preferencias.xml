@@ -45,4 +45,22 @@
             app:defaultValue="false"/>
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/prefs_category_remote_db">
+
+        <SwitchPreferenceCompat
+            app:key="usar_bd_externa"
+            app:title="@string/prefs_use_remote_db"
+            app:summary="@string/prefs_use_remote_db_summary"
+            app:defaultValue="false"/>
+
+        <EditTextPreference
+            app:key="url_api_externa"
+            app:title="@string/prefs_remote_api_url"
+            app:summary="@string/prefs_remote_api_url_summary"
+            app:defaultValue="http://10.0.2.2:8080/api"
+            app:dependency="usar_bd_externa"
+            app:useSimpleSummaryProvider="true"/>
+    </PreferenceCategory>
+
 </PreferenceScreen>
