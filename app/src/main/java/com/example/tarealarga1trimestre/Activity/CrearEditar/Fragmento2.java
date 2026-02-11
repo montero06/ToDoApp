@@ -1,5 +1,7 @@
 package com.example.tarealarga1trimestre.Activity.CrearEditar;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.MimeTypeMap;
@@ -16,6 +18,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -31,12 +34,13 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Locale;
 
+
 public class Fragmento2 extends Fragment {
 
     private FormularioViewModel viewModel;
 
     private EditText edtDescripcion;
-    private Button btnVolver, btnGuardar;
+    private Button btnVolver, btnGuardar, btnCancelar;
     private ImageButton btnAgregarDocumento, btnAgregarImagen, btnAgregarAudio, btnAgregarVideo;
     private LinearLayout contenedorArchivos;
 
@@ -55,6 +59,7 @@ public class Fragmento2 extends Fragment {
         edtDescripcion = root.findViewById(R.id.edtDescripcion);
         btnVolver = root.findViewById(R.id.btnVolver);
         btnGuardar = root.findViewById(R.id.btnGuardar);
+        btnCancelar = root.findViewById(R.id.btnCancelar);
 
         btnAgregarDocumento = root.findViewById(R.id.btnAgregarDocumento);
         btnAgregarImagen = root.findViewById(R.id.btnAgregarImagen);
@@ -70,7 +75,15 @@ public class Fragmento2 extends Fragment {
         // -------------------------
         // Botones Volver y Guardar
         // -------------------------
-        btnVolver.setOnClickListener(v -> requireActivity().finish());
+        btnVolver.setOnClickListener(v -> {
+            if (requireActivity() instanceof CrearTareaAtivity) {
+                ((CrearTareaAtivity) requireActivity()).volverPaso1();
+            } else {
+                requireActivity().finish();
+            }
+        });
+
+        btnCancelar.setOnClickListener(v -> requireActivity().finish());
 
         btnGuardar.setOnClickListener(v -> {
             // Guardar descripción en ViewModel
@@ -233,6 +246,56 @@ public class Fragmento2 extends Fragment {
         archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, uri));
         archivoView.setTextSize(14f);
         archivoView.setPadding(0, 4, 0, 4);
+        archivoView.setClickable(true);
+        archivoView.setOnClickListener(v -> abrirArchivo(uri));
         contenedorArchivos.addView(archivoView);
+    }
+
+
+    private String obtenerMimeTypeParaAbrir(Uri uri) {
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        if (mimeType != null && !mimeType.trim().isEmpty()) {
+            return mimeType;
+        }
+
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (extension != null && !extension.trim().isEmpty()) {
+            String inferido = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+            if (inferido != null && !inferido.trim().isEmpty()) {
+                return inferido;
+            }
+        }
+
+        return "*/*";
+    }
+
+    private void abrirArchivo(String uriString) {
+        if (uriString == null || uriString.trim().isEmpty()) return;
+
+        try {
+            Uri originalUri = Uri.parse(uriString);
+            Uri uriAbrir = originalUri;
+
+            if ("file".equalsIgnoreCase(originalUri.getScheme())) {
+                File archivo = new File(originalUri.getPath());
+                uriAbrir = FileProvider.getUriForFile(
+                        requireContext(),
+                        requireContext().getPackageName() + ".fileprovider",
+                        archivo
+                );
+            }
+
+            String mimeType = obtenerMimeTypeParaAbrir(uriAbrir);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uriAbrir, mimeType);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(requireContext(), R.string.no_hay_app_para_abrir_archivo, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+        }
     }
 }

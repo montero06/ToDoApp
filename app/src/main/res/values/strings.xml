@@ -68,4 +68,6 @@ Video: %4$s</string>
     <string name="detalle_tarea_titulo">Detalle de la tarea</string>
     <string name="adjuntos_label">Adjuntos</string>
     <string name="progreso_detalle">%1$d%%</string>
+    <string name="no_hay_app_para_abrir_archivo">No hay ninguna aplicación compatible para abrir este archivo.</string>
+    <string name="error_abrir_archivo">No se pudo abrir el archivo seleccionado.</string>
 </resources>
