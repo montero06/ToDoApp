@@ -1,14 +1,10 @@
 package com.example.tarealarga1trimestre.Activity.CrearEditar;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.webkit.MimeTypeMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +13,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,19 +27,20 @@ import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.R;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+
 
 public class Fragmento2 extends Fragment {
 
     private FormularioViewModel viewModel;
 
     private EditText edtDescripcion;
-    private Button btnVolver, btnGuardar;
+    private Button btnVolver, btnGuardar, btnCancelar;
     private ImageButton btnAgregarDocumento, btnAgregarImagen, btnAgregarAudio, btnAgregarVideo;
     private LinearLayout contenedorArchivos;
 
@@ -59,9 +55,11 @@ public class Fragmento2 extends Fragment {
 
         viewModel = new ViewModelProvider(requireActivity()).get(FormularioViewModel.class);
 
+        // Inicializar vistas
         edtDescripcion = root.findViewById(R.id.edtDescripcion);
         btnVolver = root.findViewById(R.id.btnVolver);
         btnGuardar = root.findViewById(R.id.btnGuardar);
+        btnCancelar = root.findViewById(R.id.btnCancelar);
 
         btnAgregarDocumento = root.findViewById(R.id.btnAgregarDocumento);
         btnAgregarImagen = root.findViewById(R.id.btnAgregarImagen);
@@ -69,6 +67,68 @@ public class Fragmento2 extends Fragment {
         btnAgregarVideo = root.findViewById(R.id.btnAgregarVideo);
         contenedorArchivos = root.findViewById(R.id.contenedorArchivos);
 
+        // Cargar descripción si ya existe en ViewModel
+        if (viewModel.getDescripcion() != null) {
+            edtDescripcion.setText(viewModel.getDescripcion());
+        }
+
+        // -------------------------
+        // Botones Volver y Guardar
+        // -------------------------
+        btnVolver.setOnClickListener(v -> {
+            if (requireActivity() instanceof CrearTareaAtivity) {
+                ((CrearTareaAtivity) requireActivity()).volverPaso1();
+            } else {
+                requireActivity().finish();
+            }
+        });
+
+        btnCancelar.setOnClickListener(v -> requireActivity().finish());
+
+        btnGuardar.setOnClickListener(v -> {
+            // Guardar descripción en ViewModel
+            viewModel.setDescripcion(edtDescripcion.getText().toString());
+
+            // Convertir strings de fechas a LocalDate
+            LocalDate fechaCreacionLD = null;
+            LocalDate fechaObjetivoLD = null;
+            try {
+                if (viewModel.getFechaCreacion() != null && !viewModel.getFechaCreacion().isEmpty())
+                    fechaCreacionLD = LocalDate.parse(viewModel.getFechaCreacion(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                if (viewModel.getFechaObjetivo() != null && !viewModel.getFechaObjetivo().isEmpty())
+                    fechaObjetivoLD = LocalDate.parse(viewModel.getFechaObjetivo(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Crear objeto Tarea
+            Tarea tarea = new Tarea(
+                    viewModel.getTitulo(),
+                    viewModel.getDescripcion(),
+                    viewModel.getProgreso(),
+                    fechaCreacionLD != null ? fechaCreacionLD : LocalDate.now(),
+                    fechaObjetivoLD != null ? fechaObjetivoLD : LocalDate.now(),
+                    viewModel.isPrioritaria(),
+                    viewModel.getUrlDoc(),
+                    viewModel.getUrlImg(),
+                    viewModel.getUrlAud(),
+                    viewModel.getUrlVid()
+            );
+
+            // Enviar a la actividad correspondiente
+            if (requireActivity() instanceof CrearTareaAtivity) {
+                ((CrearTareaAtivity) requireActivity()).guardarTareaYSalir(tarea);
+            } else if (requireActivity() instanceof EditarTareaActivity) {
+                ((EditarTareaActivity) requireActivity()).guardarTareaEditada(tarea);
+            }
+        });
+
+
+
+
+        // -------------------------
+        // Inicializar ActivityResultLauncher para archivos
+        // -------------------------
         archivoLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocument(),
                 uri -> {
@@ -78,9 +138,15 @@ public class Fragmento2 extends Fragment {
                 }
         );
 
+        // -------------------------
+        // Botones de adjuntar archivos
+        // -------------------------
         btnAgregarDocumento.setOnClickListener(v -> {
             tipoArchivoSeleccionado = "documento";
-            archivoLauncher.launch(new String[]{"application/pdf","application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
+            archivoLauncher.launch(new String[]{
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
         });
 
         btnAgregarImagen.setOnClickListener(v -> {
@@ -99,82 +165,74 @@ public class Fragmento2 extends Fragment {
         });
 
         renderArchivosAdjuntos();
+
         return root;
     }
 
-    /* ---------------- GUARDAR COPIA LOCAL ---------------- */
+    // -------------------------
+    // Método para guardar archivo local
+    // -------------------------
     private void guardarArchivoLocal(Uri uri, String tipo) {
-
         if (tipo == null) return;
 
-        try {
-            String nombre = obtenerNombreArchivo(uri);
+        String value = copiarArchivoALocal(uri, tipo);
+        if (value == null) return;
 
-            File carpeta = new File(requireContext().getFilesDir(), "adjuntos");
-            if (!carpeta.exists()) carpeta.mkdirs();
+        switch (tipo.toLowerCase(Locale.ROOT)) {
+            case "documento":
+                viewModel.setUrlDoc(value);
+                break;
+            case "imagen":
+                viewModel.setUrlImg(value);
+                break;
+            case "audio":
+                viewModel.setUrlAud(value);
+                break;
+            case "video":
+                viewModel.setUrlVid(value);
+                break;
+        }
 
-            File archivoDestino = new File(carpeta, System.currentTimeMillis() + "_" + nombre);
+        renderArchivosAdjuntos();
+    }
 
-            InputStream in = requireContext().getContentResolver().openInputStream(uri);
-            FileOutputStream out = new FileOutputStream(archivoDestino);
+    private String copiarArchivoALocal(Uri uri, String tipo) {
+        File directorioAdjuntos = new File(requireContext().getFilesDir(), "adjuntos");
+        if (!directorioAdjuntos.exists() && !directorioAdjuntos.mkdirs()) {
+            return null;
+        }
+
+        String extension = obtenerExtension(uri);
+        String nombreArchivo = tipo.toLowerCase(Locale.ROOT) + "_" + System.currentTimeMillis() + extension;
+        File destino = new File(directorioAdjuntos, nombreArchivo);
+
+        try (InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
+             FileOutputStream outputStream = new FileOutputStream(destino)) {
+            if (inputStream == null) return null;
 
             byte[] buffer = new byte[8192];
-            int read;
-            while ((read = in.read(buffer)) != -1) {
-                out.write(buffer, 0, read);
+            int bytesLeidos;
+            while ((bytesLeidos = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesLeidos);
             }
 
-            in.close();
-            out.close();
-
-            String value = archivoDestino.getAbsolutePath();
-
-            switch (tipo.toLowerCase(Locale.ROOT)) {
-                case "documento": viewModel.setUrlDoc(value); break;
-                case "imagen": viewModel.setUrlImg(value); break;
-                case "audio": viewModel.setUrlAud(value); break;
-                case "video": viewModel.setUrlVid(value); break;
-            }
-
-            renderArchivosAdjuntos();
-
+            return Uri.fromFile(destino).toString();
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Error copiando archivo", Toast.LENGTH_SHORT).show();
+            return null;
         }
     }
 
-    private void abrirAdjunto(String path) {
-        try {
-            File file = new File(path);
-
-            Uri uri = FileProvider.getUriForFile(
-                    requireContext(),
-                    requireContext().getPackageName() + ".provider",
-                    file
-            );
-
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            String mimeType = requireContext().getContentResolver().getType(uri);
-            intent.setDataAndType(uri, mimeType);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
-                startActivity(intent);
-            } else {
-                Toast.makeText(requireContext(), R.string.no_hay_app_para_adjunto, Toast.LENGTH_SHORT).show();
-            }
-
-        } catch (Exception e) {
-            Toast.makeText(requireContext(), R.string.error_abrir_adjunto, Toast.LENGTH_SHORT).show();
-        }
+    private String obtenerExtension(Uri uri) {
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        String extension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        return (extension == null || extension.trim().isEmpty()) ? "" : "." + extension;
     }
-
-    /* ----------- resto de métodos SIN cambios relevantes ----------- */
 
     private void renderArchivosAdjuntos() {
         if (contenedorArchivos == null) return;
 
         contenedorArchivos.removeAllViews();
+
         addArchivoItem(getString(R.string.documento), viewModel.getUrlDoc());
         addArchivoItem(getString(R.string.imagen), viewModel.getUrlImg());
         addArchivoItem(getString(R.string.audio), viewModel.getUrlAud());
@@ -184,54 +242,60 @@ public class Fragmento2 extends Fragment {
     private void addArchivoItem(String tipo, String uri) {
         if (uri == null || uri.trim().isEmpty()) return;
 
-        LinearLayout row = new LinearLayout(requireContext());
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, dp(4), 0, dp(4));
-
         TextView archivoView = new TextView(requireContext());
-        archivoView.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, new File(uri).getName()));
+        archivoView.setText(getString(R.string.archivo_adjunto_item, tipo, uri));
         archivoView.setTextSize(14f);
-        archivoView.setOnClickListener(v -> abrirAdjunto(uri));
-
-        Button btnEliminar = new Button(requireContext());
-        btnEliminar.setText(R.string.cm_eliminar);
-        btnEliminar.setOnClickListener(v -> {
-            eliminarAdjuntoPorTipo(tipo);
-            renderArchivosAdjuntos();
-        });
-
-        row.addView(archivoView);
-        row.addView(btnEliminar);
-        contenedorArchivos.addView(row);
+        archivoView.setPadding(0, 4, 0, 4);
+        archivoView.setClickable(true);
+        archivoView.setOnClickListener(v -> abrirArchivo(uri));
+        contenedorArchivos.addView(archivoView);
     }
 
-    private void eliminarAdjuntoPorTipo(String tipo) {
-        switch (tipo.toLowerCase(Locale.ROOT)) {
-            case "documento": viewModel.setUrlDoc(null); break;
-            case "imagen": viewModel.setUrlImg(null); break;
-            case "audio": viewModel.setUrlAud(null); break;
-            case "video": viewModel.setUrlVid(null); break;
+
+    private String obtenerMimeTypeParaAbrir(Uri uri) {
+        String mimeType = requireContext().getContentResolver().getType(uri);
+        if (mimeType != null && !mimeType.trim().isEmpty()) {
+            return mimeType;
         }
-    }
 
-    private String obtenerNombreArchivo(Uri uri) {
-        try (android.database.Cursor cursor = requireContext()
-                .getContentResolver()
-                .query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                return cursor.getString(0);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (extension != null && !extension.trim().isEmpty()) {
+            String inferido = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+            if (inferido != null && !inferido.trim().isEmpty()) {
+                return inferido;
             }
-        } catch (Exception ignored) {}
-        return "archivo";
+        }
+
+        return "*/*";
     }
 
-    private int dp(int value) {
-        return (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                value,
-                getResources().getDisplayMetrics()
-        );
+    private void abrirArchivo(String uriString) {
+        if (uriString == null || uriString.trim().isEmpty()) return;
+
+        try {
+            Uri originalUri = Uri.parse(uriString);
+            Uri uriAbrir = originalUri;
+
+            if ("file".equalsIgnoreCase(originalUri.getScheme())) {
+                File archivo = new File(originalUri.getPath());
+                uriAbrir = FileProvider.getUriForFile(
+                        requireContext(),
+                        requireContext().getPackageName() + ".fileprovider",
+                        archivo
+                );
+            }
+
+            String mimeType = obtenerMimeTypeParaAbrir(uriAbrir);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uriAbrir, mimeType);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(requireContext(), R.string.no_hay_app_para_abrir_archivo, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+        }
     }
 }
