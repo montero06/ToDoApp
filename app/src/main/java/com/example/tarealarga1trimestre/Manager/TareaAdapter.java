@@ -22,6 +22,7 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private OnEditarListener editarListener;
+    private OnItemClickListener itemClickListener;
 
     // Tamaño de letra dinámico
     private float textSizeSp = 14f;
@@ -36,6 +37,10 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
 
     public void setOneditarListener(OnEditarListener listener) {
         this.editarListener = listener;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.itemClickListener = listener;
     }
 
     // Cambiar tamaño de letra dinámicamente
@@ -106,6 +111,12 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         holder.tvPrioritaria.setTextSize(textSizeSp);
         holder.tvFechaInicio.setTextSize(textSizeSp);
 
+        holder.itemView.setOnClickListener(v -> {
+            if (itemClickListener != null) {
+                itemClickListener.onItemClick(t);
+            }
+        });
+
         // Long click para menú contextual
         holder.itemView.setOnLongClickListener(v -> {
             if (editarListener != null) {
@@ -125,5 +136,9 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     // ----------------------
     public interface OnEditarListener {
         void onEditar(Tarea tarea, int position, View view);
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(Tarea tarea);
     }
 }

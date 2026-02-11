@@ -26,6 +26,10 @@
         <string name="añadirTarea">Add Task</string>
         <string name="btn_translate">translate</string>
         <string name="btn_mode">switch theme</string>
-    </resources>
+        <string name="sinDescripcion">No description available</string>
+    <string name="detallesFragmento2Titulo">Details (fragment 2): %1$s</string>
+    <string name="btn_actualizar_datos">Update data</string>
+    <string name="datos_actualizados">Fragment 1 data updated</string>
+</resources>
 
 
