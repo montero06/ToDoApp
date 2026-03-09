@@ -55,6 +55,8 @@ public class Fragmento2 extends Fragment {
     private String tipoArchivoSeleccionado;
     private Uri uriTemporalImagen;
     private Uri uriTemporalVideo;
+    private File archivoTemporalImagen;
+    private File archivoTemporalVideo;
 
     private ActivityResultLauncher<Intent> grabarAudioLauncher;
 
@@ -159,8 +161,8 @@ public class Fragmento2 extends Fragment {
         camaraImagenLauncher = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(),
                 exito -> {
-                    if (Boolean.TRUE.equals(exito) && uriTemporalImagen != null) {
-                        guardarRutaDirectaInterna(uriTemporalImagen, "imagen");
+                    if (Boolean.TRUE.equals(exito) && archivoTemporalImagen != null) {
+                        guardarRutaDirectaInterna(archivoTemporalImagen, "imagen");
                     }
                 }
         );
@@ -168,8 +170,8 @@ public class Fragmento2 extends Fragment {
         camaraVideoLauncher = registerForActivityResult(
                 new ActivityResultContracts.CaptureVideo(),
                 exito -> {
-                    if (Boolean.TRUE.equals(exito) && uriTemporalVideo != null) {
-                        guardarRutaDirectaInterna(uriTemporalVideo, "video");
+                    if (Boolean.TRUE.equals(exito) && archivoTemporalVideo != null) {
+                        guardarRutaDirectaInterna(archivoTemporalVideo, "video");
                     }
                 }
         );
@@ -233,6 +235,7 @@ public class Fragmento2 extends Fragment {
     private void lanzarCamaraImagen() {
         File archivo = crearArchivoInternoTemporal("imagen", ".jpg");
         if (archivo == null) return;
+        archivoTemporalImagen = archivo;
         uriTemporalImagen = FileProvider.getUriForFile(
                 requireContext(),
                 requireContext().getPackageName() + ".fileprovider",
@@ -244,6 +247,7 @@ public class Fragmento2 extends Fragment {
     private void lanzarCamaraVideo() {
         File archivo = crearArchivoInternoTemporal("video", ".mp4");
         if (archivo == null) return;
+        archivoTemporalVideo = archivo;
         uriTemporalVideo = FileProvider.getUriForFile(
                 requireContext(),
                 requireContext().getPackageName() + ".fileprovider",
@@ -272,9 +276,9 @@ public class Fragmento2 extends Fragment {
         return new File(directorio, nombre);
     }
 
-    private void guardarRutaDirectaInterna(Uri uri, String tipo) {
-        if (uri == null || tipo == null) return;
-        setUrlPorTipo(tipo, uri.toString());
+    private void guardarRutaDirectaInterna(File archivo, String tipo) {
+        if (archivo == null || tipo == null) return;
+        setUrlPorTipo(tipo, Uri.fromFile(archivo).toString());
         renderArchivosAdjuntos();
     }
 

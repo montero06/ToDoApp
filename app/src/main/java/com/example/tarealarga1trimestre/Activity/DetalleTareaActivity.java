@@ -1,10 +1,12 @@
 package com.example.tarealarga1trimestre.Activity;
 
 import android.content.Intent;
+import android.content.ActivityNotFoundException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.webkit.MimeTypeMap;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -43,13 +45,13 @@ public class DetalleTareaActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tvDetallePrioridad)).setText(tarea.isPrioritaria() ? getString(R.string.prioridad_alta) : getString(R.string.prioridad_normal));
         ((TextView) findViewById(R.id.tvDetalleDescripcion)).setText(valorTexto(tarea.getDescripcion(), getString(R.string.sinDescripcion)));
 
-        configurarAdjunto(R.id.tvAdjuntoDocumento, getString(R.string.documento), tarea.getUrlDoc());
-        configurarAdjunto(R.id.tvAdjuntoImagen, getString(R.string.imagen), tarea.getUrlImg());
-        configurarAdjunto(R.id.tvAdjuntoAudio, getString(R.string.audio), tarea.getUrlAud());
-        configurarAdjunto(R.id.tvAdjuntoVideo, getString(R.string.video), tarea.getUrlVid());
+        configurarAdjunto(R.id.tvAdjuntoDocumento, getString(R.string.documento), tarea.getUrlDoc(), "application/pdf");
+        configurarAdjunto(R.id.tvAdjuntoImagen, getString(R.string.imagen), tarea.getUrlImg(), "image/*");
+        configurarAdjunto(R.id.tvAdjuntoAudio, getString(R.string.audio), tarea.getUrlAud(), "audio/*");
+        configurarAdjunto(R.id.tvAdjuntoVideo, getString(R.string.video), tarea.getUrlVid(), "video/*");
     }
 
-    private void configurarAdjunto(int viewId, String tipo, String uri) {
+    private void configurarAdjunto(int viewId, String tipo, String uri, String mimeTypePreferido) {
         TextView textView = findViewById(viewId);
         if (uri == null || uri.trim().isEmpty()) {
             textView.setText(getString(R.string.archivo_no_adjunto, tipo));
@@ -60,21 +62,29 @@ public class DetalleTareaActivity extends AppCompatActivity {
 
         textView.setText(getString(R.string.archivo_adjunto_item, tipo, obtenerNombreArchivo(uri)));
         textView.setEnabled(true);
-        textView.setOnClickListener(v -> abrirAdjunto(uri));
+        textView.setOnClickListener(v -> abrirAdjunto(uri, mimeTypePreferido));
     }
 
-    private void abrirAdjunto(String uri) {
+    private void abrirAdjunto(String uri, String mimeTypePreferido) {
         try {
             Uri targetUri = obtenerUriCompartible(uri);
-            if (targetUri == null) return;
+            if (targetUri == null) {
+                Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             String mimeType = getContentResolver().getType(targetUri);
             if (mimeType == null) mimeType = obtenerMimeTypeDesdeUri(targetUri);
+            if (mimeType == null) mimeType = obtenerMimeTypeDesdeTextoUri(uri);
+            if (mimeType == null) mimeType = mimeTypePreferido;
             intent.setDataAndType(targetUri, mimeType != null ? mimeType : "*/*");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
-        } catch (Exception ignored) {
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.no_hay_app_para_abrir_archivo, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -99,6 +109,12 @@ public class DetalleTareaActivity extends AppCompatActivity {
 
     private String obtenerMimeTypeDesdeUri(Uri uri) {
         String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        if (extension == null || extension.trim().isEmpty()) return null;
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
+    }
+
+    private String obtenerMimeTypeDesdeTextoUri(String uriTexto) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(uriTexto);
         if (extension == null || extension.trim().isEmpty()) return null;
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
     }
