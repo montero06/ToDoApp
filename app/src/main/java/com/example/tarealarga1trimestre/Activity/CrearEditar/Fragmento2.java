@@ -20,6 +20,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -30,13 +31,12 @@ import com.example.tarealarga1trimestre.Activity.EditarTareaActivity;
 import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.R;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-
 
 public class Fragmento2 extends Fragment {
 
@@ -48,7 +48,13 @@ public class Fragmento2 extends Fragment {
     private LinearLayout contenedorArchivos;
 
     private ActivityResultLauncher<String[]> archivoLauncher;
+    private ActivityResultLauncher<Uri> camaraImagenLauncher;
+    private ActivityResultLauncher<Uri> camaraVideoLauncher;
+    private ActivityResultLauncher<Void> grabarAudioLauncher;
+
     private String tipoArchivoSeleccionado;
+    private Uri uriTemporalImagen;
+    private Uri uriTemporalVideo;
 
     @Nullable
     @Override
@@ -58,7 +64,6 @@ public class Fragmento2 extends Fragment {
 
         viewModel = new ViewModelProvider(requireActivity()).get(FormularioViewModel.class);
 
-        // Inicializar vistas
         edtDescripcion = root.findViewById(R.id.edtDescripcion);
         btnVolver = root.findViewById(R.id.btnVolver);
         btnGuardar = root.findViewById(R.id.btnGuardar);
@@ -70,14 +75,10 @@ public class Fragmento2 extends Fragment {
         btnAgregarVideo = root.findViewById(R.id.btnAgregarVideo);
         contenedorArchivos = root.findViewById(R.id.contenedorArchivos);
 
-        // Cargar descripción si ya existe en ViewModel
         if (viewModel.getDescripcion() != null) {
             edtDescripcion.setText(viewModel.getDescripcion());
         }
 
-        // -------------------------
-        // Botones Volver y Guardar
-        // -------------------------
         btnVolver.setOnClickListener(v -> {
             if (requireActivity() instanceof CrearTareaAtivity) {
                 ((CrearTareaAtivity) requireActivity()).volverPaso1();
@@ -89,22 +90,21 @@ public class Fragmento2 extends Fragment {
         btnCancelar.setOnClickListener(v -> requireActivity().finish());
 
         btnGuardar.setOnClickListener(v -> {
-            // Guardar descripción en ViewModel
             viewModel.setDescripcion(edtDescripcion.getText().toString());
 
-            // Convertir strings de fechas a LocalDate
             LocalDate fechaCreacionLD = null;
             LocalDate fechaObjetivoLD = null;
             try {
-                if (viewModel.getFechaCreacion() != null && !viewModel.getFechaCreacion().isEmpty())
+                if (viewModel.getFechaCreacion() != null && !viewModel.getFechaCreacion().isEmpty()) {
                     fechaCreacionLD = LocalDate.parse(viewModel.getFechaCreacion(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                if (viewModel.getFechaObjetivo() != null && !viewModel.getFechaObjetivo().isEmpty())
+                }
+                if (viewModel.getFechaObjetivo() != null && !viewModel.getFechaObjetivo().isEmpty()) {
                     fechaObjetivoLD = LocalDate.parse(viewModel.getFechaObjetivo(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            // Crear objeto Tarea
             Tarea tarea = new Tarea(
                     viewModel.getTitulo(),
                     viewModel.getDescripcion(),
@@ -118,7 +118,6 @@ public class Fragmento2 extends Fragment {
                     viewModel.getUrlVid()
             );
 
-            // Enviar a la actividad correspondiente
             if (requireActivity() instanceof CrearTareaAtivity) {
                 ((CrearTareaAtivity) requireActivity()).guardarTareaYSalir(tarea);
             } else if (requireActivity() instanceof EditarTareaActivity) {
@@ -126,12 +125,26 @@ public class Fragmento2 extends Fragment {
             }
         });
 
+        configurarLaunchers();
 
+        btnAgregarDocumento.setOnClickListener(v -> {
+            tipoArchivoSeleccionado = "documento";
+            archivoLauncher.launch(new String[]{
+                    "application/pdf",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            });
+        });
 
+        btnAgregarImagen.setOnClickListener(v -> mostrarOpcionesImagen());
+        btnAgregarAudio.setOnClickListener(v -> mostrarOpcionesAudio());
+        btnAgregarVideo.setOnClickListener(v -> mostrarOpcionesVideo());
 
-        // -------------------------
-        // Inicializar ActivityResultLauncher para archivos
-        // -------------------------
+        renderArchivosAdjuntos();
+        return root;
+    }
+
+    private void configurarLaunchers() {
         archivoLauncher = registerForActivityResult(
                 new ActivityResultContracts.OpenDocument(),
                 uri -> {
@@ -141,46 +154,138 @@ public class Fragmento2 extends Fragment {
                 }
         );
 
-        // -------------------------
-        // Botones de adjuntar archivos
-        // -------------------------
-        btnAgregarDocumento.setOnClickListener(v -> {
-            tipoArchivoSeleccionado = "documento";
-            archivoLauncher.launch(new String[]{
-                    "application/pdf",
-                    "application/msword",
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-        });
+        camaraImagenLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(),
+                exito -> {
+                    if (Boolean.TRUE.equals(exito) && uriTemporalImagen != null) {
+                        guardarRutaDirectaInterna(uriTemporalImagen, "imagen");
+                    }
+                }
+        );
 
-        btnAgregarImagen.setOnClickListener(v -> {
-            tipoArchivoSeleccionado = "imagen";
-            archivoLauncher.launch(new String[]{"image/*"});
-        });
+        camaraVideoLauncher = registerForActivityResult(
+                new ActivityResultContracts.CaptureVideo(),
+                exito -> {
+                    if (Boolean.TRUE.equals(exito) && uriTemporalVideo != null) {
+                        guardarRutaDirectaInterna(uriTemporalVideo, "video");
+                    }
+                }
+        );
 
-        btnAgregarAudio.setOnClickListener(v -> {
-            tipoArchivoSeleccionado = "audio";
-            archivoLauncher.launch(new String[]{"audio/*"});
-        });
-
-        btnAgregarVideo.setOnClickListener(v -> {
-            tipoArchivoSeleccionado = "video";
-            archivoLauncher.launch(new String[]{"video/*"});
-        });
-
-        renderArchivosAdjuntos();
-
-        return root;
+        grabarAudioLauncher = registerForActivityResult(
+                new ActivityResultContracts.RecordSound(),
+                uri -> {
+                    if (uri != null) {
+                        guardarArchivoLocal(uri, "audio");
+                    }
+                }
+        );
     }
 
-    // -------------------------
-    // Método para guardar archivo local
-    // -------------------------
+    private void mostrarOpcionesImagen() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.imagen)
+                .setItems(new CharSequence[]{"Tomar fotografía", "Seleccionar archivo"}, (dialog, which) -> {
+                    if (which == 0) {
+                        lanzarCamaraImagen();
+                    } else {
+                        tipoArchivoSeleccionado = "imagen";
+                        archivoLauncher.launch(new String[]{"image/*"});
+                    }
+                })
+                .show();
+    }
+
+    private void mostrarOpcionesAudio() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.audio)
+                .setItems(new CharSequence[]{"Grabar audio", "Seleccionar archivo"}, (dialog, which) -> {
+                    if (which == 0) {
+                        lanzarGrabadoraAudio();
+                    } else {
+                        tipoArchivoSeleccionado = "audio";
+                        archivoLauncher.launch(new String[]{"audio/*"});
+                    }
+                })
+                .show();
+    }
+
+    private void mostrarOpcionesVideo() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.video)
+                .setItems(new CharSequence[]{"Grabar vídeo", "Seleccionar archivo"}, (dialog, which) -> {
+                    if (which == 0) {
+                        lanzarCamaraVideo();
+                    } else {
+                        tipoArchivoSeleccionado = "video";
+                        archivoLauncher.launch(new String[]{"video/*"});
+                    }
+                })
+                .show();
+    }
+
+    private void lanzarCamaraImagen() {
+        File archivo = crearArchivoInternoTemporal("imagen", ".jpg");
+        if (archivo == null) return;
+        uriTemporalImagen = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                archivo
+        );
+        camaraImagenLauncher.launch(uriTemporalImagen);
+    }
+
+    private void lanzarCamaraVideo() {
+        File archivo = crearArchivoInternoTemporal("video", ".mp4");
+        if (archivo == null) return;
+        uriTemporalVideo = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                archivo
+        );
+        camaraVideoLauncher.launch(uriTemporalVideo);
+    }
+
+    private void lanzarGrabadoraAudio() {
+        File archivo = crearArchivoInternoTemporal("audio", ".m4a");
+        if (archivo == null) return;
+        Uri uriSalida = FileProvider.getUriForFile(
+                requireContext(),
+                requireContext().getPackageName() + ".fileprovider",
+                archivo
+        );
+        grabarAudioLauncher.launch(uriSalida);
+    }
+
+    private File crearArchivoInternoTemporal(String tipo, String extensionPorDefecto) {
+        File directorio = obtenerDirectorioAdjuntosInternos();
+        if (directorio == null) {
+            Toast.makeText(requireContext(), R.string.error_storage_unavailable, Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+        String nombre = tipo.toLowerCase(Locale.ROOT) + "_" + System.currentTimeMillis() + extensionPorDefecto;
+        return new File(directorio, nombre);
+    }
+
+    private void guardarRutaDirectaInterna(Uri uri, String tipo) {
+        if (uri == null || tipo == null) return;
+        setUrlPorTipo(tipo, uri.toString());
+        renderArchivosAdjuntos();
+    }
+
     private void guardarArchivoLocal(Uri uri, String tipo) {
         if (tipo == null) return;
 
-        String value = copiarArchivoALocal(uri, tipo);
+        boolean guardarEnInterna = !"documento".equalsIgnoreCase(tipo);
+        String value = copiarArchivoALocal(uri, tipo, guardarEnInterna);
         if (value == null) return;
 
+        setUrlPorTipo(tipo, value);
+        renderArchivosAdjuntos();
+    }
+
+    private void setUrlPorTipo(String tipo, String value) {
         switch (tipo.toLowerCase(Locale.ROOT)) {
             case "documento":
                 viewModel.setUrlDoc(value);
@@ -195,12 +300,10 @@ public class Fragmento2 extends Fragment {
                 viewModel.setUrlVid(value);
                 break;
         }
-
-        renderArchivosAdjuntos();
     }
 
-    private String copiarArchivoALocal(Uri uri, String tipo) {
-        File directorioAdjuntos = obtenerDirectorioAdjuntos();
+    private String copiarArchivoALocal(Uri uri, String tipo, boolean guardarEnInterna) {
+        File directorioAdjuntos = guardarEnInterna ? obtenerDirectorioAdjuntosInternos() : obtenerDirectorioAdjuntosDocumentos();
         if (directorioAdjuntos == null) {
             Toast.makeText(requireContext(), R.string.error_storage_unavailable, Toast.LENGTH_SHORT).show();
             return null;
@@ -226,8 +329,15 @@ public class Fragmento2 extends Fragment {
         }
     }
 
+    private File obtenerDirectorioAdjuntosInternos() {
+        File baseDir = new File(requireContext().getFilesDir(), "adjuntos");
+        if (!baseDir.exists() && !baseDir.mkdirs()) {
+            return null;
+        }
+        return baseDir;
+    }
 
-    private File obtenerDirectorioAdjuntos() {
+    private File obtenerDirectorioAdjuntosDocumentos() {
         boolean guardarEnSd = PreferenceManager
                 .getDefaultSharedPreferences(requireContext())
                 .getBoolean("sd", false);
@@ -299,7 +409,6 @@ public class Fragmento2 extends Fragment {
         archivoView.setOnClickListener(v -> abrirArchivo(uri));
         contenedorArchivos.addView(archivoView);
     }
-
 
     private String obtenerMimeTypeParaAbrir(Uri uri) {
         String mimeType = requireContext().getContentResolver().getType(uri);
