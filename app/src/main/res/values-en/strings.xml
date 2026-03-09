@@ -94,4 +94,10 @@ Video: %4$s</string>
     <string name="prefs_use_remote_db_summary">Enable HTTP/HTTPS requests to load and save tasks from a remote API.</string>
     <string name="prefs_remote_api_url">API base URL</string>
     <string name="prefs_remote_api_url_summary">Example: http://10.0.2.2:8080/api</string>
+    <string name="play_audio">Play audio</string>
+    <string name="pause_audio">Pause audio</string>
+    <string name="audio_reproduciendo">Playing audio...</string>
+    <string name="audio_pausado">Audio paused.</string>
+    <string name="audio_finalizado">Audio finished.</string>
+    <string name="documento_no_compatible">The document could not be displayed in-app. Only PDF is supported.</string>
 </resources>
