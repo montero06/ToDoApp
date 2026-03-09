@@ -1,7 +1,10 @@
 package com.example.tarealarga1trimestre.Activity.CrearEditar;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,6 +24,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -50,11 +54,14 @@ public class Fragmento2 extends Fragment {
     private ActivityResultLauncher<String[]> archivoLauncher;
     private ActivityResultLauncher<Uri> camaraImagenLauncher;
     private ActivityResultLauncher<Uri> camaraVideoLauncher;
-    private ActivityResultLauncher<Void> grabarAudioLauncher;
+    private ActivityResultLauncher<String> permisoAudioLauncher;
 
     private String tipoArchivoSeleccionado;
     private Uri uriTemporalImagen;
     private Uri uriTemporalVideo;
+
+    private MediaRecorder grabadoraAudio;
+    private File archivoAudioTemporal;
 
     @Nullable
     @Override
@@ -172,11 +179,13 @@ public class Fragmento2 extends Fragment {
                 }
         );
 
-        grabarAudioLauncher = registerForActivityResult(
-                new ActivityResultContracts.RecordSound(),
-                uri -> {
-                    if (uri != null) {
-                        guardarArchivoLocal(uri, "audio");
+        permisoAudioLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                concedido -> {
+                    if (Boolean.TRUE.equals(concedido)) {
+                        mostrarDialogoGrabacionAudio();
+                    } else {
+                        Toast.makeText(requireContext(), "Permiso de micrófono denegado", Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -199,15 +208,102 @@ public class Fragmento2 extends Fragment {
     private void mostrarOpcionesAudio() {
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.audio)
-                .setItems(new CharSequence[]{"Grabar audio", "Seleccionar archivo"}, (dialog, which) -> {
+                .setItems(new CharSequence[]{"Grabar audio (Recorder)", "Seleccionar archivo"}, (dialog, which) -> {
                     if (which == 0) {
-                        lanzarGrabadoraAudio();
+                        verificarPermisoYGrabarAudio();
                     } else {
                         tipoArchivoSeleccionado = "audio";
                         archivoLauncher.launch(new String[]{"audio/*"});
                     }
                 })
                 .show();
+    }
+
+    private void verificarPermisoYGrabarAudio() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED) {
+            mostrarDialogoGrabacionAudio();
+        } else {
+            permisoAudioLauncher.launch(Manifest.permission.RECORD_AUDIO);
+        }
+    }
+
+    private void mostrarDialogoGrabacionAudio() {
+        if (!iniciarGrabacionConRecorder()) {
+            return;
+        }
+
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Grabando audio")
+                .setMessage("Pulsa detener para guardar la grabación.")
+                .setCancelable(false)
+                .setPositiveButton("Detener y guardar", (dialog, which) -> detenerYGuardarGrabacion())
+                .setNegativeButton("Cancelar", (dialog, which) -> cancelarGrabacion())
+                .show();
+    }
+
+    private boolean iniciarGrabacionConRecorder() {
+        try {
+            archivoAudioTemporal = crearArchivoInternoTemporal("audio", ".m4a");
+            if (archivoAudioTemporal == null) {
+                return false;
+            }
+
+            grabadoraAudio = new MediaRecorder();
+            grabadoraAudio.setAudioSource(MediaRecorder.AudioSource.MIC);
+            grabadoraAudio.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+            grabadoraAudio.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            grabadoraAudio.setOutputFile(archivoAudioTemporal.getAbsolutePath());
+            grabadoraAudio.prepare();
+            grabadoraAudio.start();
+            return true;
+        } catch (Exception e) {
+            liberarGrabadora();
+            Toast.makeText(requireContext(), "No se pudo iniciar la grabación", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
+    private void detenerYGuardarGrabacion() {
+        try {
+            if (grabadoraAudio != null) {
+                grabadoraAudio.stop();
+            }
+            liberarGrabadora();
+
+            if (archivoAudioTemporal != null && archivoAudioTemporal.exists()) {
+                setUrlPorTipo("audio", Uri.fromFile(archivoAudioTemporal).toString());
+                renderArchivosAdjuntos();
+            }
+        } catch (Exception e) {
+            liberarGrabadora();
+            Toast.makeText(requireContext(), "No se pudo guardar la grabación", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void cancelarGrabacion() {
+        try {
+            if (grabadoraAudio != null) {
+                grabadoraAudio.stop();
+            }
+        } catch (Exception ignored) {
+        } finally {
+            liberarGrabadora();
+            if (archivoAudioTemporal != null && archivoAudioTemporal.exists()) {
+                //noinspection ResultOfMethodCallIgnored
+                archivoAudioTemporal.delete();
+            }
+        }
+    }
+
+    private void liberarGrabadora() {
+        if (grabadoraAudio != null) {
+            try {
+                grabadoraAudio.release();
+            } catch (Exception ignored) {
+            }
+            grabadoraAudio = null;
+        }
     }
 
     private void mostrarOpcionesVideo() {
@@ -244,17 +340,6 @@ public class Fragmento2 extends Fragment {
                 archivo
         );
         camaraVideoLauncher.launch(uriTemporalVideo);
-    }
-
-    private void lanzarGrabadoraAudio() {
-        File archivo = crearArchivoInternoTemporal("audio", ".m4a");
-        if (archivo == null) return;
-        Uri uriSalida = FileProvider.getUriForFile(
-                requireContext(),
-                requireContext().getPackageName() + ".fileprovider",
-                archivo
-        );
-        grabarAudioLauncher.launch(uriSalida);
     }
 
     private File crearArchivoInternoTemporal(String tipo, String extensionPorDefecto) {
@@ -455,5 +540,11 @@ public class Fragmento2 extends Fragment {
         } catch (Exception e) {
             Toast.makeText(requireContext(), R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        cancelarGrabacion();
+        super.onDestroyView();
     }
 }
