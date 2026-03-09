@@ -151,6 +151,7 @@ public class ListadoTareasActivity extends AppCompatActivity {
 
         listaActualVisualizada = listaFiltrada;
         adapter.setDatos(listaActualVisualizada);
+        recycler.scheduleLayoutAnimation();
 
         float textSize = pxToSp(utilLetra.getTamanoLetra(this));
         adapter.setTamanodeLetra(textSize);
