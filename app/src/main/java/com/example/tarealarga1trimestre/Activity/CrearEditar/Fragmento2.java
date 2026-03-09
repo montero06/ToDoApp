@@ -208,7 +208,7 @@ public class Fragmento2 extends Fragment {
     private void mostrarOpcionesAudio() {
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.audio)
-                .setItems(new CharSequence[]{"Grabar audio (Recorder)", "Seleccionar archivo"}, (dialog, which) -> {
+                .setItems(new CharSequence[]{"Grabar audio", "Seleccionar archivo"}, (dialog, which) -> {
                     if (which == 0) {
                         verificarPermisoYGrabarAudio();
                     } else {
@@ -253,6 +253,8 @@ public class Fragmento2 extends Fragment {
             grabadoraAudio.setAudioSource(MediaRecorder.AudioSource.MIC);
             grabadoraAudio.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
             grabadoraAudio.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            grabadoraAudio.setAudioEncodingBitRate(128000);
+            grabadoraAudio.setAudioSamplingRate(44100);
             grabadoraAudio.setOutputFile(archivoAudioTemporal.getAbsolutePath());
             grabadoraAudio.prepare();
             grabadoraAudio.start();
