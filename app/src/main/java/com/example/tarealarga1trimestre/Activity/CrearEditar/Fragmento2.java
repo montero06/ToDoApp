@@ -50,11 +50,13 @@ public class Fragmento2 extends Fragment {
     private ActivityResultLauncher<String[]> archivoLauncher;
     private ActivityResultLauncher<Uri> camaraImagenLauncher;
     private ActivityResultLauncher<Uri> camaraVideoLauncher;
-    private ActivityResultLauncher<Void> grabarAudioLauncher;
+
 
     private String tipoArchivoSeleccionado;
     private Uri uriTemporalImagen;
     private Uri uriTemporalVideo;
+
+    private ActivityResultLauncher<Intent> grabarAudioLauncher;
 
     @Nullable
     @Override
@@ -173,10 +175,14 @@ public class Fragmento2 extends Fragment {
         );
 
         grabarAudioLauncher = registerForActivityResult(
-                new ActivityResultContracts.RecordSound(),
-                uri -> {
-                    if (uri != null) {
-                        guardarArchivoLocal(uri, "audio");
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == android.app.Activity.RESULT_OK
+                            && result.getData() != null) {
+                        Uri uri = result.getData().getData();
+                        if (uri != null) {
+                            guardarArchivoLocal(uri, "audio");
+                        }
                     }
                 }
         );
@@ -247,14 +253,12 @@ public class Fragmento2 extends Fragment {
     }
 
     private void lanzarGrabadoraAudio() {
-        File archivo = crearArchivoInternoTemporal("audio", ".m4a");
-        if (archivo == null) return;
-        Uri uriSalida = FileProvider.getUriForFile(
-                requireContext(),
-                requireContext().getPackageName() + ".fileprovider",
-                archivo
-        );
-        grabarAudioLauncher.launch(uriSalida);
+        Intent intent = new Intent(android.provider.MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+        try {
+            grabarAudioLauncher.launch(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(requireContext(), R.string.no_hay_app_para_abrir_archivo, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private File crearArchivoInternoTemporal(String tipo, String extensionPorDefecto) {
