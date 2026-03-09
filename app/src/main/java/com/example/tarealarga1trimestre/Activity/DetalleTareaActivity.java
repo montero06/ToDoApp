@@ -1,15 +1,13 @@
 package com.example.tarealarga1trimestre.Activity;
 
 import android.app.AlertDialog;
-import android.content.ContentResolver;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.pdf.PdfRenderer;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -101,7 +99,7 @@ public class DetalleTareaActivity extends AppCompatActivity {
                 reproducirVideoEnDialogo(targetUri);
                 break;
             default:
-                mostrarDocumentoEnDialogo(targetUri);
+                abrirDocumentoEnAppExterna(targetUri);
                 break;
         }
     }
@@ -204,46 +202,17 @@ public class DetalleTareaActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void mostrarDocumentoEnDialogo(Uri uri) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            Toast.makeText(this, R.string.documento_no_compatible, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        ParcelFileDescriptor descriptor = null;
-        PdfRenderer renderer = null;
-        PdfRenderer.Page page = null;
-
+    private void abrirDocumentoEnAppExterna(Uri uri) {
         try {
-            ContentResolver resolver = getContentResolver();
-            descriptor = resolver.openFileDescriptor(uri, "r");
-            if (descriptor == null) throw new IOException();
-
-            renderer = new PdfRenderer(descriptor);
-            if (renderer.getPageCount() == 0) throw new IOException();
-
-            page = renderer.openPage(0);
-            Bitmap bitmap = Bitmap.createBitmap(page.getWidth(), page.getHeight(), Bitmap.Config.ARGB_8888);
-            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-
-            ImageView imageView = new ImageView(this);
-            imageView.setAdjustViewBounds(true);
-            imageView.setImageBitmap(bitmap);
-
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.documento)
-                    .setView(imageView)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show();
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            String mimeType = getContentResolver().getType(uri);
+            intent.setDataAndType(uri, mimeType != null ? mimeType : "*/*");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.no_hay_app_para_abrir_archivo, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(this, R.string.documento_no_compatible, Toast.LENGTH_SHORT).show();
-        } finally {
-            try {
-                if (page != null) page.close();
-                if (renderer != null) renderer.close();
-                if (descriptor != null) descriptor.close();
-            } catch (Exception ignored) {
-            }
+            Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
         }
     }
 
