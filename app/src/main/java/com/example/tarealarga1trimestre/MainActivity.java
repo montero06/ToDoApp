@@ -3,6 +3,10 @@ package com.example.tarealarga1trimestre;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-
+        iniciarAnimacionesInicio();
 
         //  Empezar
         findViewById(R.id.btn_Empezar).setOnClickListener(v ->
@@ -63,4 +67,16 @@ public class MainActivity extends AppCompatActivity {
         );
 
     }
+
+    private void iniciarAnimacionesInicio() {
+        ImageView logo = findViewById(R.id.imageView);
+        TextView eslogan = findViewById(R.id.tvEslogan);
+
+        Animation animacionLogo = AnimationUtils.loadAnimation(this, R.anim.anim_logo_inicio);
+        Animation animacionEslogan = AnimationUtils.loadAnimation(this, R.anim.anim_eslogan_inicio);
+
+        logo.startAnimation(animacionLogo);
+        eslogan.startAnimation(animacionEslogan);
+    }
+
 }

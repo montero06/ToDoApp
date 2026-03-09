@@ -32,7 +32,8 @@
         android:layout_width="match_parent"
         android:layout_height="668dp"
         android:layout_below="@+id/toolbar"
-        android:layout_marginTop="-1dp" />
+        android:layout_marginTop="-1dp"
+        android:layoutAnimation="@anim/layout_anim_lateral" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnAgregarTarea"
