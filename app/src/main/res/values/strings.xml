@@ -94,4 +94,10 @@ Vídeo: %4$s</string>
     <string name="prefs_use_remote_db_summary">Activa peticiones HTTP/HTTPS para cargar y guardar tareas en una API remota.</string>
     <string name="prefs_remote_api_url">URL base de la API</string>
     <string name="prefs_remote_api_url_summary">Ejemplo: http://10.0.2.2:8080/api</string>
+    <string name="play_audio">Reproducir audio</string>
+    <string name="pause_audio">Pausar audio</string>
+    <string name="audio_reproduciendo">Reproduciendo audio...</string>
+    <string name="audio_pausado">Audio pausado.</string>
+    <string name="audio_finalizado">Audio finalizado.</string>
+    <string name="documento_no_compatible">No se pudo visualizar el documento en la app. Solo PDF compatible.</string>
 </resources>

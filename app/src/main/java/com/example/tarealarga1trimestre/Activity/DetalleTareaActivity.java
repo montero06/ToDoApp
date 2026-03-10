@@ -1,10 +1,19 @@
 package com.example.tarealarga1trimestre.Activity;
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.webkit.MimeTypeMap;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
@@ -14,11 +23,14 @@ import com.example.tarealarga1trimestre.Manager.Tarea;
 import com.example.tarealarga1trimestre.R;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 
 public class DetalleTareaActivity extends AppCompatActivity {
 
     private final DateTimeFormatter formatterFecha = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +47,12 @@ public class DetalleTareaActivity extends AppCompatActivity {
         cargarDatos(tarea);
     }
 
+    @Override
+    protected void onDestroy() {
+        liberarAudio();
+        super.onDestroy();
+    }
+
     private void cargarDatos(Tarea tarea) {
         ((TextView) findViewById(R.id.tvDetalleTitulo)).setText(valorTexto(tarea.getTitulo(), getString(R.string.sin_titulo)));
         ((TextView) findViewById(R.id.tvDetalleFechaCreacion)).setText(tarea.getFechaCreacion().format(formatterFecha));
@@ -43,13 +61,13 @@ public class DetalleTareaActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.tvDetallePrioridad)).setText(tarea.isPrioritaria() ? getString(R.string.prioridad_alta) : getString(R.string.prioridad_normal));
         ((TextView) findViewById(R.id.tvDetalleDescripcion)).setText(valorTexto(tarea.getDescripcion(), getString(R.string.sinDescripcion)));
 
-        configurarAdjunto(R.id.tvAdjuntoDocumento, getString(R.string.documento), tarea.getUrlDoc());
-        configurarAdjunto(R.id.tvAdjuntoImagen, getString(R.string.imagen), tarea.getUrlImg());
-        configurarAdjunto(R.id.tvAdjuntoAudio, getString(R.string.audio), tarea.getUrlAud());
-        configurarAdjunto(R.id.tvAdjuntoVideo, getString(R.string.video), tarea.getUrlVid());
+        configurarAdjunto(R.id.tvAdjuntoDocumento, getString(R.string.documento), tarea.getUrlDoc(), "documento");
+        configurarAdjunto(R.id.tvAdjuntoImagen, getString(R.string.imagen), tarea.getUrlImg(), "imagen");
+        configurarAdjunto(R.id.tvAdjuntoAudio, getString(R.string.audio), tarea.getUrlAud(), "audio");
+        configurarAdjunto(R.id.tvAdjuntoVideo, getString(R.string.video), tarea.getUrlVid(), "video");
     }
 
-    private void configurarAdjunto(int viewId, String tipo, String uri) {
+    private void configurarAdjunto(int viewId, String tipo, String uri, String tipoAdjunto) {
         TextView textView = findViewById(viewId);
         if (uri == null || uri.trim().isEmpty()) {
             textView.setText(getString(R.string.archivo_no_adjunto, tipo));
@@ -60,21 +78,151 @@ public class DetalleTareaActivity extends AppCompatActivity {
 
         textView.setText(getString(R.string.archivo_adjunto_item, tipo, obtenerNombreArchivo(uri)));
         textView.setEnabled(true);
-        textView.setOnClickListener(v -> abrirAdjunto(uri));
+        textView.setOnClickListener(v -> abrirAdjuntoEnApp(uri, tipoAdjunto));
     }
 
-    private void abrirAdjunto(String uri) {
-        try {
-            Uri targetUri = obtenerUriCompartible(uri);
-            if (targetUri == null) return;
+    private void abrirAdjuntoEnApp(String uri, String tipoAdjunto) {
+        Uri targetUri = obtenerUriCompartible(uri);
+        if (targetUri == null) {
+            Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        switch (tipoAdjunto) {
+            case "imagen":
+                mostrarImagenEnDialogo(targetUri);
+                break;
+            case "audio":
+                reproducirAudioEnDialogo(targetUri);
+                break;
+            case "video":
+                reproducirVideoEnDialogo(targetUri);
+                break;
+            default:
+                abrirDocumentoEnAppExterna(targetUri);
+                break;
+        }
+    }
+
+    private void mostrarImagenEnDialogo(Uri uri) {
+        try {
+            Bitmap bitmap;
+            try (InputStream input = getContentResolver().openInputStream(uri)) {
+                if (input == null) throw new IOException();
+                bitmap = BitmapFactory.decodeStream(input);
+            }
+
+            if (bitmap == null) {
+                Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            ImageView imageView = new ImageView(this);
+            imageView.setAdjustViewBounds(true);
+            imageView.setImageBitmap(bitmap);
+
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.imagen)
+                    .setView(imageView)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void reproducirVideoEnDialogo(Uri uri) {
+        VideoView videoView = new VideoView(this);
+        videoView.setVideoURI(uri);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.video)
+                .setView(videoView)
+                .setPositiveButton(android.R.string.ok, (d, which) -> videoView.stopPlayback())
+                .create();
+
+        dialog.setOnDismissListener(d -> videoView.stopPlayback());
+        dialog.show();
+        videoView.start();
+    }
+
+    private void reproducirAudioEnDialogo(Uri uri) {
+        liberarAudio();
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (16 * getResources().getDisplayMetrics().density);
+        layout.setPadding(pad, pad, pad, pad);
+
+        TextView estado = new TextView(this);
+        estado.setText(R.string.audio);
+
+        Button btnPlayPause = new Button(this);
+        btnPlayPause.setText(R.string.play_audio);
+
+        layout.addView(estado);
+        layout.addView(btnPlayPause);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.audio)
+                .setView(layout)
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+
+        dialog.setOnDismissListener(d -> liberarAudio());
+
+        btnPlayPause.setOnClickListener(v -> {
+            try {
+                if (mediaPlayer == null) {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setDataSource(this, uri);
+                    mediaPlayer.setOnCompletionListener(mp -> {
+                        btnPlayPause.setText(R.string.play_audio);
+                        estado.setText(R.string.audio_finalizado);
+                    });
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    btnPlayPause.setText(R.string.pause_audio);
+                    estado.setText(R.string.audio_reproduciendo);
+                } else if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    btnPlayPause.setText(R.string.play_audio);
+                    estado.setText(R.string.audio_pausado);
+                } else {
+                    mediaPlayer.start();
+                    btnPlayPause.setText(R.string.pause_audio);
+                    estado.setText(R.string.audio_reproduciendo);
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+                liberarAudio();
+            }
+        });
+
+        dialog.show();
+    }
+
+    private void abrirDocumentoEnAppExterna(Uri uri) {
+        try {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            String mimeType = getContentResolver().getType(targetUri);
-            if (mimeType == null) mimeType = obtenerMimeTypeDesdeUri(targetUri);
-            intent.setDataAndType(targetUri, mimeType != null ? mimeType : "*/*");
+            String mimeType = getContentResolver().getType(uri);
+            intent.setDataAndType(uri, mimeType != null ? mimeType : "*/*");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(intent);
-        } catch (Exception ignored) {
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.no_hay_app_para_abrir_archivo, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.error_abrir_archivo, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void liberarAudio() {
+        if (mediaPlayer != null) {
+            try {
+                mediaPlayer.release();
+            } catch (Exception ignored) {
+            }
+            mediaPlayer = null;
         }
     }
 
@@ -95,12 +243,6 @@ public class DetalleTareaActivity extends AppCompatActivity {
                 getPackageName() + ".fileprovider",
                 archivo
         );
-    }
-
-    private String obtenerMimeTypeDesdeUri(Uri uri) {
-        String extension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-        if (extension == null || extension.trim().isEmpty()) return null;
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
     }
 
     private String obtenerNombreArchivo(String uri) {
